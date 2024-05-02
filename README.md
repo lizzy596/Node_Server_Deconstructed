@@ -26,7 +26,12 @@ Basically Unless you're parsing json you will get undefined for all info posted 
 
 c. DATABASE
 
-Add the logic to create an instance of your database server in the connectDB.js
+Added the logic to create an instance of your database server in the connectDB.js
+
+d. MODULE
+
+Added the module folder which will hold all of our models, routes, controllers, services etc by data unit
 
 
-d. Added http-status package for status codes
+e. Added http-status package for status codes
+
