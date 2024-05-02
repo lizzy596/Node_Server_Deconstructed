@@ -1,30 +1,21 @@
 const express = require('express');
+const cors = require('cors');
+const routes = require('./routes/v1');
 
 // Creates an instance of Express
 const app = express();
 
-// Define a route
-app.get('/v1', (req, res) => {
-  res.send('Hello, World!');
-});
+// parse json request body
+app.use(express.json());
+// // parse urlencoded request body
+app.use(express.urlencoded({ extended: true }));
 
-// Per Express Documentation: 
-// The req.body property contains key-value pairs of data submitted in 
-// The request body. By default, it is undefined and is populated when
-// You use a middleware called body-parsing such as express.urlencoded() or express.json(). 
+// enable cors
+app.use(cors());
+app.options('*', cors());
 
-
-//.A. WHAT ERROR WILL YOU HAVE HERE?
-
-// app.post('/v1', (req, res) => {
-//   const { message } = req.body;
-//   console.log('req', req.body);
-//   res.send(`We received your ${message}`);
-//  })
-
- app.post('/v1', (req, res) => {
- res.send('You hit our endpoint!');
- })
+// v1 api routes
+app.use('/v1', routes);
 
 
 

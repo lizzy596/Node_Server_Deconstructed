@@ -1,9 +1,24 @@
+require('dotenv').config();
 const app = require('./app');
+const connectDB = require('./config/DB/connectDB');
 
 // Define port number
-const PORT = 3010;
+const port = process.env.PORT || 5000;
 
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+
+let server;
+
+const start = async () => {
+  try {
+    await connectDB(process.env.MONGO_URL);
+    server = app.listen(port, () =>
+      console.log(`Server is listening on port ${port}...`)
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+start();
+
