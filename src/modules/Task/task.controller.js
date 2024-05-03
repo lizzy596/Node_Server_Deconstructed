@@ -14,9 +14,21 @@ const getTasks = async (req, res) => {
   res.send(result);
 };
 
-const getTask = async (req, res) => {
-  const task = await taskService.getTaskById(req.params.taskId);
-  res.send(task);
+const getTask = async (req, res, next) => {
+  try {
+    const task = await taskService.getTaskById(req.params.taskId);
+    if (!task) {
+      const error = new Error('Task not found')
+      error.status = 406
+      next(error);
+      return
+    }
+    console.log(task.title);
+    res.send(task);
+
+  } catch (err) {
+    next(err);
+  }
 };
 
 const updateTask = async (req, res) => {

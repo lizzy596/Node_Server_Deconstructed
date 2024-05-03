@@ -17,6 +17,11 @@ app.options('*', cors());
 // v1 api routes
 app.use('/v1', routes);
 
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.status(500).send('Something broke!')
+})
+
 
 
 
