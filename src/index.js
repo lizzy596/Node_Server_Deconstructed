@@ -1,9 +1,19 @@
-const app = require('./app');
+ require('./http.module.js')
+// require('./asyncOperations')
+// require('./eventEmitter');
+// require('./requestEvent');
+//require('./createBigFile');
+//require('./streams');
+//require('./httpStream');
 
-// Define port number
-const PORT = 3010;
+// require('./eventLoop');
 
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// const osModule = require('./os.module');
+// require('./fs.module');
+// require('./path.module');
+// const sampleFunc = require('./sampleFunc');
+//require('./mindGrenade');
+
+
+

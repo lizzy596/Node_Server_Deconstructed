@@ -1,0 +1,417 @@
+Gathering Client Requirements Advice:
+
+Agile is the way to go.
+Think of microtasks as "MVPs", or Mininal Viable Products. The goal is to ship, as early as possible, a piece of the project that stands and is useful on its own, even if the whole project isn't finished.
+The exact size of such a chunk will vary. It can be a single button, or a whole form complete with validation and codependent fields, or it can be a whole page without which the site is kinda useless (normally you should be able to cut down the page to smaller chunks, but it may happen that it's not possible).
+Really, read about Agile. It's pretty easy and intuitive, the hard part is in figuring out what's useful and what's not, to you, on this project, and "forcing" yourself to stay on top of "rituals" instead of cutting corners and acting erratically.
+My resource has been the book "Essential SCRUM". Here's the book on Amazon.ca, feel free to find it in your region. 
+
+MVP is the way to go. Break things into necessary chunks, and figure out if any are requisites for another. I often have to battle clients on focusing on small pictures instead of building upon an idea that hasn't even started yet. Once you get the bones of something, it becomes easier to add more small chunks to flesh them out.
+For me, the first step is setting up a data model, and then I basically have an outline for how to tackle inputs and outputs based on which ones are overarching and which ones are complimentary.
+I found that adding a bug tracker for my project helped me. I fired one up, and started adding things that were not working or needed changes, as if I was an end user trying to access the project. Obviously there might be some big missing parts in the project, so I would add missing feature: whatever, and when I get to it on the list I break it out further. Say I am doing a web app that allows users to change certain settings, but I have not added that at all yet. Cannot change user settings
+settings page is missing
+
+
+cannot change site theme
+
+
+cannot change timezones
+
+
+cannot change units from miles to km
+
+
+Then just close out the bugs as you finish things. Then go back through the feature when it is done and do some real testing or have someone work through it in front of you and add their input or bugs into the same tracker.
+Really helped me to have a list like that.
+At work we focus strongly on making the MVP for projects to help stay on top of scope creep (which you’ll get a lot of in a large project). The idea is to sit down and figure out what the Minimum Viable Product is, then once you have that you can work in stages to build on top of it to extend the functionality. There’s bound to be a ton of articles online about this concept.
+One thing to keep in mind is that you need to keep your code flexible so that extending it in the future isn’t going to require a total rewrite.
+Also definitely agree with anyone suggesting breaking down your work into tasks and tracking them on a project management tool ( some examples are trello, favro, or airtable)
+I wanted to jump in and emphasize this. MVP is minimum viable product. What's the BARE MINIMUM your product has to do to function? If what you're working on doesn't contribute to that, you're spinning your tires. If you wait for your app to be perfect with every bell and whistle before you release it, there are two problems:
+it'll take forever
+
+
+you've built all these features based on what you think is best, not your users. They will think your bells are too quiet and your whistles are not shrill enough. You will have built stuff wrong because you are not your user.
+
+
+Get the minimum product out the door and then get feedback on that to develop the extras.
+Also double jumping in on this emphasize:
+MVPs always become the final product
+So don’t write throwaway code, thinking you can just refactor it later. (Won’t happen & if it does, it’s out of your pocket)
+You can’t control for everything, nor should you. Only build what’s needed but before you start, focus on asking the client tough questions during discovery phase.
+Trello is my tool of choice too. I use it for planning and managing 1000+ hour projects.
+I create a list for each module, and a card for each sub module. Within each card I have an overview in the description, and then a checklist of requirements.
+As a basic example, I'd have a list for "Contact Page", a card for "Contact Form", and then in the checklist of requirements I'd have entries like "User must enter name, email and message", "User may optionally enter phone number", "Submitted form should be stored in the database", "When a new form is submitted, admin users should be notified".
+Using this method removes a lot of surprises during development, and also gives a nice visual feedback to what's completed.
+Apologies for zero formatting; mobile user here.
+
+
+I recommend using a visual way to see your work, like a kanban board. You can create a board in Trello. In your board, each column represent a step in your process. I personally use:
+Backlog (all tasks, prioritised)
+
+
+To Do (tasks I want to complete this week)
+
+
+Doing
+
+
+QA / Testing
+
+
+Done
+
+
+When your board is set up:
+Break down your project in deliverables (aka epics, or versions) and divide these deliverables in tasks. The tasks can be named as you want, as long as you understand clearly what needs to be done (I personally like the user story format). Ideally, each tasks must create business value.
+
+
+Prioritise your deliverables in the backlog column. Identify clearly your deliverables using tags or a custom field.
+
+
+Every week, add new work in the to do column that you want to complete this week. If you have unfinished work from last week, make sure you add less items to this week.
+
+
+Don't start working on the next deliverable before completing the previous one.
+
+
+Tips:
+Don't work on too many things at once. Limit the number of tasks that are in progress (to do + doing + QA) to a number you are comfortable with. I personally limit myself to 3-4 items.
+
+
+Every day, work first on the tasks that are closer to completion. When you read your board, read it from right to left (it's easier to start new tasks than finish them... don't fall in this trap).
+
+
+When a task is blocked (unseen dependency, external blocker) mark your task as blocked in your board (tag, color, etc.). Make sure your unblock your tasks before starting new one.
+
+
+Keep your board updated in real-time.
+
+
+After a few weeks, you'll see how many tasks you complete each week on average. Using this number, it'll be easier for you to calculate when the project may be finished.
+
+
+Reward yourself when you complete a deliverable.
+
+
+Look at the number of completed tasks in your Done column to stay proud and motivated!
+
+
+Consider the system in terms of a Mealy finite state machine. This will massively accelerate your thinking as to what you need, and allow you to see all the functions necessary to make the system work from end to end. You can start to work on the individual pieces.
+This will also help expose the events and actions that are used by the system.
+For example, say you had to make an app that allows people to use the toilet. If we are going to do this, we might as well use jokes to expose the logic.
+The toilet process will have some finite states like this:
+- INITIAL STATE
+- SITTING_ON_TOILET
+- STANDING_WITH_TOILET_FULL
+- STANDING_WITH_TOILET_EMPTY (maybe they dumped out of the process, pun intended)
+- TOILET_FLUSHING_IN_PROGRESS
+- TOILET_FLUSHING_ERROR
+- TOILET_FLUSHING_SUCCESS (maybe it returns back to INITIAL_STATE, or maybe you need that completed state to play a magic sound from a speaker in the wall)
+- STANDING_AT_SINK
+- WASHING_HANDS_IN_PROGRESS
+- WASHING_PROSTHETIC_HANDS_IN_PROGRESS (maybe this is a different user type that has a specific state)
+- WASHING_HANDS_COMPLETE
+- WASHING_HANDS_ERROR
+Imagine each of these is a state that is effectively a boolean, like isInitialState = (state === 'INITIAL_STATE');
+Then you could imagine state is the switch that holds the value of the current state. This is important because it means your system can only be in one state at any given time, so you don't have to worry about crap like if (isWashingHands && isToiletFlushing) which is prone to errors because the app will get confused if somehow the toilet starts flushing at the wrong time. You are restricting the potential for bugs to occur and drastically simplifying your app logic in almost all cases because you can reason about moments in time by what state the app is in, not by what state is derived at a specific moment in time.
+Then, you can attach UI to each of those states, and the only thing that remains is to examine what events and user actions can occur, and use those to make the app transition from state to state.
+In our example, we can easily see we need a function called something like startFlushingToilet that initiates the toilet flush process and moves from STANDING_WITH_TOILET_FULL to TOILET_FLUSHING_IN_PROGRESS.
+If you want your app to play a chime sound when the toilet is done flushing, then clearly you need to hook into the moment in time when the state goes from TOILET_FLUSHING_IN_PROGRESS to TOILET_FLUSHING_SUCCESS.
+Maybe you can throw down an event listener that fires off a function called startPlayingChime.
+Notice how quickly we can zoom in on things we definitely need regardless of how complex everything is and regardless of things we don't know in areas of the app we haven't considered yet.
+This is what Mealy finite state machines can do for you.
+David K Piano wrote a rad article that you should read that will expand further about why we care about this way of thinking about apps: https://medium.com/@DavidKPiano/the-facetime-bug-and-the-dangers-of-implicit-state-machines-a5f0f61bdaa2
+These states would work awesome in a React/Vue app, but they would also work awesome as server-side states during a process such as a server request, which is a request/response loop.
+- STARTED_HANDLING_REQUEST
+- EXAMINING_PAYLOAD
+- PAYLOAD_IS_LEGIT
+- PAYLOAD_IS_HORRIFIC
+- STARTED_PROCESSING_SOMETHING
+- FINISHED_PROCESSING_SOMETHING
+- FAILED_PROCESSING_SOMETHING
+- SENT_RESPONSE
+etc, etc, start by doing these for your project and then marvel at how fast you can make progress on whatever you feel like.
+Anyway, hopefully that is not helpful.
+
+
+https://medium.com/@DavidKPiano/the-facetime-bug-and-the-dangers-of-implicit-state-machines-a5f0f61bdaa2
+
+I see people throwing around phrases/terms like "use tool X or tool Y" and "user stories" and "microtasks"
+None of that shit is going to help you if you don't have a proper plan. If you've never created a project plan, start googling, learn the basics:
+Define the business need. What are you building? What is it going to be used for? Who is going to be using it?
+Just the general definition so you know the end goal.
+
+
+Write it down, make a long long long bulleted list of everything that needs to be done.
+I recommend you start by creating a sitemap [make it a tree with parent and child pages so you know how a user navigates from one to another] of the system. One for the frontend users and one for the admin accounts needed to manage the system. This will help you define the user roles you need and which type has access to what.
+
+
+For each "page" listed in your sitemap define what elements need to appear on that page. It can be generic like "[sign up form]" you can define the fields later.
+
+
+Define two separate blocks for the "header" and "footer" of the application/site. This way you can define how the navigation will work, what shows up where on the site. In some cases you need different displays within the header and footer depending on where in the system a user finds themselves.
+
+
+Once the sitemap and list are done, you essentially have your main "Task List", each page can be defined as a task and you can add subtasks to them "build contact page" => "build contact form" => "define fields for contact form, who does it go to, what are the error messages and thank you messages [at this point you should be doing this in the code and just write the damn things out in your error handling]
+
+
+This is about as rough as a project plan can get. There's a lot more detail and what you find on google will have you writing 1000 page documents. Don't bother. No one reads the fucking things.
+Stick with bulleted lists/checklists and follow a preset path through the system.
+Always start at the top of your sitemap trees [home page for frontend] and for example [login screen for admin side] and work your way down each branch. If you define the pages/branches well, you almost never need to switch to another branch until the previous one is done, so you have your deliverables defined this way as well.
+Always start building the admin side first. Your user/frontend is useless if an admin can't manage the information presented to them.
+Identify the people who will be using the system. How dumb are they? Make it work for the dumbest one. Assume everyone is 5 or 75 years old and has no idea how to use this thing. Make it so they can use it. Label buttons clearly, label forms clearly, add short descriptions to any form saying what it does. This includes search forms and filters and popup forms etc.
+750 hours is a fuck ton of work. Without a good plan you'll most likely end up spending double that time unless you're experienced and can actually keep track of all of that crap in your head [not recommended even if you are experienced] Write shit down. Never memorize that which you can look up. It's also used as proof to the client of your progress. Write up weekly reports, or monthly depending on how fast this project is moving. Just a bulleted list of what's been done and what you're working on next. Every now and then throw in the full list of "things to do" so they can see the needle moving towards completion. This is easily a 1-2 year project, especially when freelancing.
+Good luck.
+PS: The tools you use are only useful if you're comfortable using them. I find myself using notion.so a lot this past year. It lets you create pages [essentially custom objects] that can directly be references from the task management part of the application, so you can create tickets that directly point to a page with the details of that section of the site. So you can put your documentation AND your task management in one place that's real easy to work with, but to each their own. Find what works for you.
+In order to plan and build a programming project there are three key steps I now use when building projects, these are what work for me but they should work for anyone.
+Step 1: Defining the project
+The first step when planning a programming project is to define it.
+When I am defining the project I ask myself these 4 questions:
+What is the project?
+
+
+What is the MVP (Minimal Viable Product)?
+
+
+What are the nice to haves?
+
+
+When will the project be complete?
+
+
+Example project definition
+To give a simple example, let's say we are going to build a calculator app. We would have a basic project definition like below.
+Calculator app project
+What is the project? - The calculator project is a project to build a calculator that is accessible in a web browser. The project is going to be solved using HTML, CSS and JavaScript. It will allow users to input numbers and calculate the results of those numbers based on the arithmetic operation they choose.
+What is the MVP? - The minimal viable product is a calculator that renders in a web browsers that can perform addition, subtraction, multiplication and division operations based on a users input and show the user the result of that equation.
+What are the nice to haves? - The nice to haves for this project are styling the calculator, taking keyboard presses as input not just users clicking buttons and adding higher order operations like 'to the power of x'.
+When will the project be complete? - The project will be complete once all the MVP features have been implemented and the calculator has been styled.
+The above definition is simple and straight forward. If my Mum picked it up she would understand what the project is about. She would understand because it tells you what the project is, the MVP features you must build, the nice to have features and when it will be complete. By defining the project you make a project less intimidating.
+Once you have the project definition you can begin the next step.
+Step 2: Creating the workflow
+The next step is the simplest. Usually this step can be combined with step 3. But, just for now we are going to look at it here as a separate step so that I can show you how to set up a very basic workflow for your own projects. Once you have done it once, it can be a default step for the rest of your projects.
+You first want to use something like Trello a free tool to manage projects.
+To set up our Kanban board we want to create 4 columns.
+TODO
+
+
+DOING
+
+
+DONE
+
+
+BUGS / NOT SURE HOW TO DO
+
+
+what it looks like
+Within these columns we are going to add cards. As we work on the cards we move them into the doing column and once we have finished with that card we can move it to the done column. If you have a bug you are stuck on or are not sure how to do something we can move it to the bugs/not sure column.
+Now we have our workflow set up we can get onto the last step, the one that stumped me the most when I was learning to code.
+Step 3: Breaking the project down into smaller components
+The key to building your own projects starts with breaking the big project down into smaller, less intimidating components. These smaller components are what become our cards from step 2.
+Now this sounds simple enough, but when I was first starting out it did not occur to me that you could do this. I thought most developers just start coding and the project flowed out of them like you see in the movies. I thought that was what I was supposed to be able to do. However, now that I have had a chance to work in the industry I know that is definitely not the case, in fact a good developer will break that project down into smaller tasks.
+Yet, as a beginner it can be hard to know how to break something down into smaller tasks. If you don't know how to actually build the project then how can you break it down?
+Well the first thing you need to do is look at your project definition and then break it down into smaller parts.
+Let's continue using the calculator app example to make our component cards:
+Calculation functions - MVP
+
+
+Get user input - MVP
+
+
+HTML user interface - MVP
+
+
+Style user interface - sprinkles
+
+
+JavaScript event listeners - MVP
+
+
+Add animations for calculations - sprinkles
+
+
+update what it should look like
+You'll notice that for each card, we assigned a label of either MVP or sprinkles this is to visually help you see which cards are the most important and therefore the ones to work on first.
+The biggest benefit of the cards is that they have simplified what we have to do already. This makes projects less intimidating as you are not making a big daunting calculator app, rather you are doing 6 smaller projects that will combine to create one big project.
+As you work on a card you move it into the doing column. Taking your time to get the component working before you move onto the next card.
+But we are not done yet, we can simplify and improve our workflow even more to ensure we are not getting blocked by the size of the project when building.
+Step 3a: Break each component into smaller checklists
+Once we have the high level cards we can then break those components down again into smaller tasks by breaking those tasks into checklists so we can track our progress.
+The example below is just how my brain works so you can break it into smaller or larger items depending on what works for you. Let's use the calculation functions card as an example of how to break a component down further.
+As the task is an MVP task and I have defined the MVP as basic calculations addition, subtraction, multiplication and division we need to add those functions to the checklist.
+what the checklist would look like
+We have now broken our calculation functions card into 4 little projects that we can work on. How much easier is that than the abstract and super daunting task of building a calculator app, or even writing the calculator functions (the card).
+We can now focus and figure out how to make each of these functions. As we do that we get to check those items off giving us a sense of accomplishment and progress. Then once we have done all four of those items we can move the card into the done column and get cracking on the next card.
+From here on we just need to repeat the process for each card. So you are ready to get building awesome projects.
+
+Now you should have everything you need to get building projects. If you see someone on r/learnprogramming in the future struggling to get out of tutorial hell, don't just tell them to build. Tell them how to plan and build.
+If you made it to the end of the post firstly thanks for reading - I originally published this (with a bit more detail) on my blog here, I like to write about coding and what I'm learning to help others so consider checking it out and my newsletter if you got value out of this.
+
+My pattern is to focus on "What are the acceptance criteria?" IE: What do I need to finish in order for this screen or feature to be accepted by the customer? That becomes the starting point for my task list. Break it down to the fundamentals: "Data needs to flow into the form on load and out to the service properly on save, with positive feedback on either a successful or failed save state." That right there tells you that you need to lay out the page, wire up the data bindings, ensure those bindings work properly through all edit interactions, send the edited object back to the service or whatever DAL you're using, get confirmation it saved or didn't and why, and present that info to the user in a message box or toast of some kind. Loads of discrete tasks there. 
+
+How to Plan and Build a Project
+EDIT: Here is part 2: https://www.reddit.com/r/learnprogramming/comments/ngu4mz/how_to_plan_and_build_a_project_building_it/
+Hi everyone,
+I wanted to share a process I have been using for several years to plan how to build any project whether it is a smaller personal project or a large project with a team of developers. This is also similar to the process we use on our team at work.
+To get started, we create three very short and simple artifacts before starting to build a new project. A one-pager, a workflow diagram, and a task list. Depending on the size of the project, this usually takes one person a day or less to complete.
+These artifacts are created in this order. First, a one-page description of the project in human terms. Anyone should be able to read this single page and know what the project will do. Next, a workflow diagram is created which is actually a combination sequence, class, and workflow diagram. Once the workflow diagram is done, a task list is created from the workflow diagram with tasks broken down into single day units of work. The task list tells us where to start and what else we will be doing each day until the project is done.
+The following describes these three artifacts using a small project, a landing page service, as an example.
+The source code for the project MVP built using the artifacts below is here:
+https://github.com/bigspotteddog/landing-page-service
+How to Write a One-Pager
+A one-pager is typically a single page or less that describes the project in human terms so anyone reading it will know what the project will do. I usually just start describing the project, usually starting with the problem that needs to be solved and what I want it to do.
+For a personal project, I am the one who writes the one-pager. At work, the one-pager is typically written by the product owner.
+Sample one-pager
+Landing Page Service
+We have some courses and other digital products we would like to create landing pages for that will collect the email addresses of people interested in each of these products.
+We would like to collect the email addresses somewhere so we can send out emails to inform our prospective customers about the products they are interested in. It would be nice if the system would automatically send a response email thanking the prospective customer for registering. That would give the customer an immediate response rather than waiting for us to notice that a new customer registered and then sending them an email manually much later.
+Since we will have several digital products the emails sent to the customer should be tailored to the product they are interested in. That way, we can customize the email sent out for a particular product.
+It would be nice to have the ability to create an email template for a product that way we can personalize the email with their name or other information about the product.
+We have seen other email marketing systems that can send out a series of emails spaced out with a couple of days in between. We would like to be able to schedule a series of emails for a product and specify the number of days in between each email and the next one.
+Some of the emails may have links to PDFs or other downloadable links.
+Once a customer purchases a product, they should no longer receive sales related emails and they should now be sent product related update emails.
+We would like to track where an email addresses was submitted from so we can see which marketing campaigns were successful and which ones were not and at what point the customer converted. There could be several locations with the email input form and it is possible we will add this to blog articles or other places.
+A customer should be able to unsubscribe from receiving emails. If customer registers again after unsubscribing we would like that email address to be reactivated from where they left off.
+How to Create a Workflow Diagram
+Next, we create a workflow diagram from the one-pager description. This workflow diagram is a combination of a sequence diagram and a class diagram done in a workflow like form. This diagram does not use strict UML, just boxes and lines with arrows or diamonds, and a bunch of text in the whitespace to describe that part of the diagram. I often number the steps or show some form of entry point so the reader knows where to start from. The boxes are classes or screen mockups, the lines with arrows indicate the direction of flow while the lines with diamonds indicate class relationships.
+Sample workflow diagram
+Sample workflow diagram
+To create this diagram, I am using Balsamiq Mockups but you can use anything that can draw boxes and lines. I used to use paper and pencil. Balsamiq has that browser widget you see on the left but it could just as well be a box that said browser in the middle of it.
+I started drawing this diagram from the one-pager by going through it looking for things that have information we need. Looking at the one-pager, I picked the word "product" from the first paragraph and figured it should have a name and description. Reading through the next few paragraphs, I picked out the word "email" and drew that box. Don't start connecting lines yet, just put the boxes on the diagram on the first pass. From there I put all of the other boxes on the diagram then started grouping the boxes that should be next to each other. After that, I drew the lines and put some of the text from the one-pager on the diagram reworded to describe the program flow.
+With the diagram completed, it is easier to review the system to see milestone boundaries for releases. In the diagram, we were able to trim out an MVP by simply having the receiving handler send out a response email instead of having to develop the automated part of the system to get an initial release of something functional.
+Once the task breakdown step is completed (below) the tasks identified are added to the workflow diagram to show what part of the system that task builds.
+How to Create a Task Breakdown
+With the workflow diagram completed, I start from the entry point and create a task list to complete that one box or line on the diagram. This could be a single task if it can be completed in a day; otherwise, it ends up being a description of what needs to be accomplished and a list of subtasks are created in single day chunks until the parent task is completely tasked out. Then it is on to the next box or line in the work flow. Sometimes, there are multiple entry points so each of those are addressed in the same manner.
+In the diagram above, the entry point for the MVP starts with the web page form at step 4.
+Task durations can be whatever you or your team are comfortable with. For myself, I like one day tasks because it is a day of work or less. I often have gaps in time that I am working on a personal project, so having the task done is better than trying to remember where I was a few days ago. With a team, you have pull requests to be reviewed then testing, so a single day of development will typically run about 3 days with 24-hour turnaround. One for development, one for review and any changes, one for testing.
+This sample task breakdown has all of the system tasked out to give a complete example. Normally, I would only task the part that is going to be built in the current release. In this case, the MVP in blue on the diagram would be the only part tasked out or tasks 1 through 9 below.
+With the task list, I know where to start and what I will be doing one task after the other until the project is done.
+Sample task breakdown
+Landing Page Service
+Allow customers to register with their email (post request to database, send email)
+Publish landing page
+Task 1: Get an application server running locally with template landing page
+
+
+Task 2: Get template landing page hosted on the Internet
+
+
+Task 3: Modify the landing page to customize it for our business
+
+
+Task 4: Modify the landing page to send a post request to a url with a fake campaign_id and the entered email address
+
+
+Save email addresses
+Task 5: Create an email endpoint to receive the email post request
+
+
+Task 6: Create a database table to save email addresses
+
+
+Task 7: Save the email address received to the email database table
+
+
+Send email response
+Task 8: Modify the email endpoint to send a thank you response email
+
+
+Task 9: Modify the landing page to popup a thank you message
+
+
+This is now a functional MVP!
+Process emails (restful processing, database)
+Administrative pages (add authentication)
+Task 10: Create an administrative website for restricted access
+
+
+Task 11: Add authentication to the website for administrative pages
+
+
+Task 12: Add an administrative user account
+
+
+Get the list of email addresses (get request to return a list)
+Task 13: Add an endpoint that returns the list of emails
+
+
+Task 14: Add a web page that displays the list of emails
+
+
+Add products (post request to create records in the database)
+Task 15: Create a web page to post a product
+
+
+Task 16: Create a product endpoint to receive the product post request
+
+
+Task 17: Create a database table to save products
+
+
+Task 18: Save the product received to the product database table
+
+
+Add campaigns (containment database relationships)
+Task 19: Create a web page to post a campaign
+
+
+Task 20: Create a campaign endpoint to receive the campaign post request
+
+
+Task 21: Create a database table to save campaigns
+
+
+Task 22: Save the campaign received to the campaign database table
+
+
+Associate emails to products by campaign (aggregate database relationships)
+Task 23: Modify the email endpoint to look up the campaign
+
+
+Task 24: Create a database table to save the product-email associations
+
+
+Task 25: Modify the email endpoint to create the product-email association
+
+
+Task 26: Modify the email listing to show the products an email is interested in
+
+
+Email templates (using templates)
+Task 27: Create an email template to use for sending the thank you response email
+
+
+Task 28: Modify the thank you response email to use the template
+
+
+Task 29: Create a web page to post an email template
+
+
+Task 30: Create an endpoint to receive an email template
+
+
+Task 31: Create a database table to save the email template
+
+
+Task 32: Save the email template received to the email template database table
+
+
+Task 33: Use the email template to send the thank you response email
+
+
+Scheduling tasks (restful, database, sending emails)
+Schedule email (more restful)
+Task 34: Create an endpoint to receive a scheduled email
+
+
+Task 35: Create a database table to save the scheduled email
+
+
+Task 36: Create a web page to post a scheduled email
+
+
+Task 37: Save the scheduled email to the scheduled email database table
+
+
+Send scheduled emails (running scheduled tasks)
