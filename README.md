@@ -1,6 +1,6 @@
+<strong>1. Basic Node</strong>
+
 This is a very basic Node REST server with no frameworks, just vanilla node.js.
-
-
 
 
 Node is an asynchronous event-driven JavaScript runtime
