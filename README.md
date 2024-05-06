@@ -1,3 +1,5 @@
+# **2. Node server with Express**
+
 This is a very basic Node REST server using Express.
 
 We have created an Express instance in our app.js file, and setup two routes a GET and POST.
