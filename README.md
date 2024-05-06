@@ -1,4 +1,4 @@
-<strong>1. Basic Node</strong>
+**1. Basic Node**
 
 This is a very basic Node REST server with no frameworks, just vanilla node.js.
 
