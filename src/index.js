@@ -13,6 +13,7 @@
 //require('./8-WorkerThreads/intensiveTask');
 //require('./8-WorkerThreads/worker');
 //require('./8-WorkerThreads/mainThread');
+require('./9-NodeServer/nodeServer');
 //require('./createBigFile');
 // const sampleFunc = require('./sampleFunc');
 

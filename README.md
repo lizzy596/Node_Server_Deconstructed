@@ -155,3 +155,52 @@ him prepare multiple meals at the same time. Ideal for multiple cpu-intensive jo
 
 A core refers to the physical component of the cpu itself, which can only execute one task at a time. The amount of node workers
 you can run in parallel is equal to the amount of cpu cores you have.
+
+
+## **Basic Request/Response Cycle**
+
+
+Every time we type a url into the browser we are sending a request to the server that has those resources.
+
+Request Message - Has a method, headers and an optional body, URl
+
+Response Message -> Status Code, Status Text, Headers, and an Optional Body
+
+content-type: text/html or application/json
+
+
+    Informational responses (100 – 199)
+    Successful responses (200 – 299)
+    Redirection messages (300 – 399)
+    Client error responses (400 – 499)
+    Server error responses (500 – 599)
+
+
+    The internet is fundamentally about passing packets back and forth.
+
+    5 layers to a packet
+    Physical- cables
+    Link- wifi/ethernet
+    Network- IP
+    Transport- UDP/TCP
+    Application- http/ftp/smtp etc
+
+
+**Transport and Network layer together form TCP/IP**
+
+
+UDP- FAST, UNRELIABLE lightweight, 8 bytes for a header, connectionless, consistency, will send data no matter what, doesnt care about packet loss or order, big win is that it is very fast.
+TCP- RELIABLE connection-based, you must go through a three-way handshake, 1. client says id like to connect 2. server says yes or no 3. data starts streaming, very reliable. Delivery acknowledgements,
+lets client know the data was received, retransmission of data is possible, packets in order
+
+
+Initally http just made to pass around html, now it can pass many types of digital files. First webpage ever: http://info.cern.ch/. HTT is only connected when required. It can disconnect and re-establish the connection to send a response. It is stateless-there is no dialogue. Once the connection is closed to two machines forget each other.  As soon as the 
+request hits the server the http connection is terminated. The TCP connection is still open. The http connection will reopen to send the response.
+
+HTTP Mesage:
+
+1. start line -describes the type of request ex. GET /blog http/1.1
+2. header -metadata, key-value pairs, content-type: text/plain
+3. body -actual stuff
+
+For the homepage the / is added by the browser http://localhost/
