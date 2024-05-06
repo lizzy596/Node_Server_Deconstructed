@@ -1,7 +1,8 @@
-**1. Basic Node**
+# **0. Basic Node**
 
 This is a very basic Node REST server with no frameworks, just vanilla node.js.
 
+## **What is Node?**
 
 Node is an asynchronous event-driven JavaScript runtime
 
@@ -9,38 +10,42 @@ This is in contrast to today's more common concurrency model, in which OS thread
 
 Blocking is when the execution of additional JavaScript in the Node.js process must wait until a non-JavaScript operation completes. This happens because the event loop is unable to continue running JavaScript while a blocking operation is occurring.
 
-In Node.js, JavaScript that exhibits poor performance due to being CPU intensive rather than waiting on a non-JavaScript operation, such as I/O, isn't typically referred to as blocking. Synchronous methods in the Node.js standard library that use libuv are the most commonly used blocking operations. Native modules may also have blocking methods.
+Synchronous methods in the Node.js standard library that use libuv are the most commonly used blocking operations. Native modules may also have blocking methods.
 
 All of the I/O methods in the Node.js standard library provide asynchronous versions, which are non-blocking, and accept callback functions. Some methods also have blocking counterparts, which have names that end with Sync.
 
-Async tasks get offloaded
+**Async tasks get offloaded**
 
-For example: using the fs module:
+_For example: using the fs module:_
 
-SYNCHRONOUS:
+**SYNCHRONOUS:**
+
 const data = fs.readFileSync('/file.md'); //blocks until file is read
-ASYNCHRONOUS:
+
+**ASYNCHRONOUS:**
+
 fs.readFile('/file.md', (err, data) => {
   if (err) throw err;
 });
-he first example appears simpler than the second but has the disadvantage of the second line blocking the execution of any additional JavaScript until the entire file is read. Note that in the synchronous version if an error is thrown it will need to be caught or the process will crash. In the asynchronous version, it is up to the author to decide whether an error should throw as shown.
+
+The first example appears simpler than the second but has the disadvantage of the second line blocking the execution of any additional JavaScript until the entire file is read. Note that in the synchronous version if an error is thrown it will need to be caught or the process will crash. In the asynchronous version, it is up to the author to decide whether an error should throw as shown.
 
 
 
-look at what the fs module prints when you run it synchronously vs asynchronously
+Look at the example code and see what the fs module prints when you run it synchronously vs asynchronously.
 
 
 
-GLOBALS:
+### **GLOBALS:**
 
 In plain JS we have access to the Window object which is very useful when you're working with browser best applications
 there is no window in node. But there is a concept of global variables. 
 
-__dirname: path to current directory
-__filename: file name
-require: function to use modules (commonjs)
-module: info about current module
-process = info about env where the program is being executed
+**__dirname:** path to current directory
+**__filename:** file name
+**require:** function to use modules (commonjs)
+**module:** info about current module
+**process** = info about env where the program is being executed, process is referring to the current node process that is running
 
 
 process is very useful  because when our app runs in production it will run on different enviornments, ex digital ocean
@@ -48,10 +53,10 @@ process is very useful  because when our app runs in production it will run on d
 
 
 
-MODULES:
+### **MODULES:**
 
-You split your code into modules. The key is a module is encapsulated code, so you only share what you want to share.
-The built in module global has a property called exports which is just an empty object ex.  exports: {},
+You split your code into modules. The key is that a module is encapsulated code, so you only share what you want to share.
+The built in module global has a property called exports which is just an empty object **ex.  exports: {}**,
 Everything dumped in this object (like your functions) is something you'll have access to globally
 
 
@@ -60,27 +65,27 @@ module.exports = thingBeingExported
 
 module.exports = { firstThing, secondThing }
 
-you can also export like this since module.exports is an empty object, this is like setting a property on an object
+you can also export like this since module.exports is an empty object, this is like setting a property on an object:
 
 modules.exports.items = ['item1', 'item2]
 
 
 
 
-You can also import code just like require('./someModule'), if we have a function inside the module that we invoke in that module, because when you import a
-module you are actually invoking it already (because when node exports the code its actually wrapping it in a function).
+You can also import code just like this require('./someModule'), if we have a function inside the module that we invoke in that module, because when you import a
+module you are actually invoking it already (because when node exports the code its actually wrapping the exported code in a function).
+
+Some of the built in modules include: http, fs, buffer, os, process, stream, events, path
 
 
-HTTP MODULE
-
-Notice that we are not exiting when we run an http server, because we servers continue to listen
+HTTP MODULE - Notice that we are not exiting when we run an http server, because we servers continue to listen
 
 
-package-lock.json --keeps a record of the version of your dependencies and versions of the dependencies your dependencies use
+**package-lock.json** --keeps a record of the version of your dependencies and versions of the dependencies your dependencies use
 
 
 
-NODE EVENT LOOP
+### **NODE EVENT LOOP**
 
 The event loop is what allows Node.js to perform non-blocking I/O operations — despite the fact that JavaScript is single-threaded — by offloading operations to the system kernel whenever possible.Since most modern kernels are multi-threaded, they can handle multiple operations executing in the background. When one of these operations completes, the kernel tells Node.js so that the appropriate callback may be added to the poll queue to eventually be executed. We'll explain this in further detail later in this topic.
 
@@ -96,20 +101,19 @@ Phases Overview
     close callbacks: some close callbacks, e.g. socket.on('close', ...).
 
 
+Mental Model: 
 
-Users make requests -> what if some user makes a time consuming request -> Reigster CB (these are DB tasks, FS, networks, etc) so the event loop registers the callback, then off loads the task in the background, when the task is complete it rejoins the event loop
-and executes the callback
-
-
-setTimeout actions are off loaded and return to the event loop when the callback has completed
-setInteval processes must be killed, because the callback continues to fire at reqular intevals, this is
-similar to server.listen, which is an asynchronous and the event loop just continues to listen for requests to come to the server
+Users make requests -> Now what if some user makes a time consuming request? -> Reigster CB (these are DB tasks, FS, networks, etc) so the event loop registers the callback, then off loads the task in the background, when the task is complete it rejoins the event loop and executes the callback
 
 
+-setTimeout actions are off loaded and return to the event loop when the callback has completed
+-setInteval processes must be killed, because the callback continues to fire at reqular intevals, this is similar to server.listen, which is an asynchronous and the event loop just continues to listen for requests to come to the server
 
-EVENT DRIVEN PROGRAM
 
--the flow of the program is at least partly determined  by undertaken events (like user events)
+
+**EVENT DRIVEN PROGRAM**
+
+The flow of the program is at least partly determined  by undertaken events (like user events)
 
 We listen for specific events and register functions that will execute when those events occur
 
@@ -118,7 +122,8 @@ ORDER of events matter, listen for it before you emit it
 
 
 
-STREAMS
+**STREAMS**
+
 Used to read or write data sequentially
 
 writeable, readable, 
@@ -129,4 +134,24 @@ transform - data can be modified
 
 Streams extend event emitter class
 
+### **Threads in Node:**
 
+Code executed in work threads runs in a separate child process and doesnt block the main app. Clust modules can be used to run multiple node
+instances that can distribute workloads. The work_threads module allows for running multiple application threads within a single node instance
+When process isolation is not need, that is no separate instances of v8, event loop and memory are needed, use worker threads.
+
+
+**Concurreny vs Parallelism:** 
+
+Normally JS is a single-threaded language, meaning it can only take advantage of one cpu core, called the main thread. However due to the event loop, this one thread can execute code concurrently.
+
+**Concurrency-** Blocking code is executed off the main thread, and then when it completes it returns to the main thread. Its literally like saying, execute some code, then call me back. With concurrency you're doing different jobs that overlap over different time periods in no specific order.
+
+ex. one cook in the kitchen cooking multiple meals for different customers, one on the stove, one in the oven, one in the microwave.
+
+**Parallelism-** is also about doing multiple things at once, but it utilizes multiple cpu cores to perform operations that would otherwise block the main thread.Its like a main chef having multiple sous chefs helping 
+him prepare multiple meals at the same time. Ideal for multiple cpu-intensive jobs running at the same time. It will help with multiple image processing simultaneously etc. it is not that helpful for i/o work, like reading and writing from a filesystem, DB or network communication, because in those cases you're waiting for the network or disc to supply the actual data and the cpu cant really speed that up.So multithreading doesn't automatically mean speeding everything up, it spreads work over multiple cpu cores when the cpu is doing the heavy lifting.
+
+
+A core refers to the physical component of the cpu itself, which can only execute one task at a time. The amount of node workers
+you can run in parallel is equal to the amount of cpu cores you have.

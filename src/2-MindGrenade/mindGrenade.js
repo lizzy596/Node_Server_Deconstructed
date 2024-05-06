@@ -1,3 +1,6 @@
+//see how in this file, we have invoked the function
+
+
 const num1 = 5;
 const num2 = 10;
 
