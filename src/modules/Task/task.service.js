@@ -1,5 +1,5 @@
 const Task = require('./task.model');
-const { paginate } = require('../../config/DB/plugins');
+const { paginate } = require('../../config/db/plugins');
 
 
 

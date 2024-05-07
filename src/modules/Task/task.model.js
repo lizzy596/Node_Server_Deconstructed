@@ -1,19 +1,22 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('../../config/DB/plugins');
+const { toJSON } = require('../../config/db/plugins');
 
 
 const taskSchema = mongoose.Schema(
   {
     title: {
-      type: String,
+      type: Number,
       required: true,
-    //   index: true,
-    // },
-    // user: {
-    //   type: mongoose.SchemaTypes.ObjectId,
-    //   ref: 'User',
-    //   required: true,
+      //   index: true,
+      // },
+      // user: {
+      //   type: mongoose.SchemaTypes.ObjectId,
+      //   ref: 'User',
+      //   required: true,
     },
+    description: {
+      type: String
+    }
   },
   {
     timestamps: true,

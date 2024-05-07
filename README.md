@@ -1,12 +1,14 @@
-Chapter 3 Error Handling and Validation
+# **Chapter 3 Error Handling and Validation**
 
 Error handling in Express. 
 
 Express will automatically handle synchronous errors and async errors must be passed to the next middleware where Express will catch and process them
 
 
-Operational Errors -> Errors you can account for and expect and have decided handling for
-Programming Errors -> problems in the code. Example: console.log(apple) when there's no variable called apple. 
+**Operational Errors** -> Errors you can account for and expect and have decided handling for in the normal course of the user using the app.
+
+**Programming Errors** -> problems in the code. Example: console.log(apple) when there's no variable called apple. 
+
 ex. 
 task-controller
  const getTask = async (req, res) => {
@@ -81,9 +83,9 @@ if you don’t catch your errors close to the source, for example immediately af
 
 Note that the default error handler can get triggered if you call next() with an error in your code more than once, even if custom error handling middleware is in place.
 
-Define error-handling middleware functions in the same way as other middleware functions, except error-handling functions have four arguments instead of three: (err, req, res, next).
+**Define error-handling middleware functions in the same way as other middleware functions, except error-handling functions have four arguments instead of three: (err, req, res, next).**
 
-You define error-handling middleware last, after other app.use() and routes calls; for example:
+**You define error-handling middleware last, after other app.use() and routes calls**
 
 
-
+**If you pass an error to next() and you do not handle it in a custom error handler, it will be handled by the built-in error handler; the error will be written to the client with the stack trace. The stack trace is not included in the production environment.**

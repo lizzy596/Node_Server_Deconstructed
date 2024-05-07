@@ -1,11 +1,13 @@
 const express = require('express');
 const taskController = require('./task.controller');
+const taskValidation = require('./task.validation');
+const validate = require('../../config/middlewares/validate');
 
 const router = express.Router();
 
 router
   .route('/')
-  .post(taskController.createTask)
+  .post(validate(taskValidation.createTask), taskController.createTask)
   .get( taskController.getTasks);
 
 router
