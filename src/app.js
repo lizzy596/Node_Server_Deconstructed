@@ -3,35 +3,34 @@ const express = require('express');
 // Creates an instance of Express- an "app" is the express function createApplication inside the express module invoked and is an express application
 const app = express();
 
+
+//This middleware calls next()
 function validateUser(req, res, next) {
   res.locals.validated = true;
   console.log('my validate middleware is running')
   next()
   }
+
+  //this middleware DOESNOT call next()
+  function stopTheChain (req, res, next) {
+    console.log('I Want to prove the chain will stop here since I do not call next')
+    //next()
+    }
   
   // this will run the validateUser middleware on every request
   app.use(validateUser)
 
-
-//all is a method and takes 2 args 1. route 2. callback to run if the route is requested.
-
-
-// app.all('*', (req, res) => {
-//   // Express handles the basic headers
-//   res.send(`<h1>This is the homepage</h1>`);
-// })
+  app.use(stopTheChain);
 
 
-// app.use is how you mount middleware, it will be added accross the board to everything
-// app.use(express.static(path.join(__dirname, ')
+
 
 // Define a route
 
-
-
-//we dont call next() here so this is the end of the cycle, no more middleware will run
+//Note that when we DONT call next() this is the end of the cycle, no more middleware will run and the GET route will not be hit
 app.get('/v1', (req, res) => {
   console.log(res.locals.validated)
+  console.log('i am hiting my route')
   res.send('Hello, World!');
 });
 
