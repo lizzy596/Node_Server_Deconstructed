@@ -1,15 +1,12 @@
 const ClientError = require('../error/ClientError');
 const httpStatus = require('http-status');
 const mongoose = require('mongoose');
-const { z } = require('zod');
+
 
 const errorHandler = (err, req, res, next) => {
   if (err instanceof ClientError) {
-    return res.status(err.code).json({ msg: err.message })
+    return res.status(err.code).send({ msg: err.message })
   }
-  // if (err instanceof z.ZodError) {
-  //   return res.status(httpStatus.BAD_REQUEST).json({ msg: err.message })
-  // }
   if (err instanceof mongoose.Error) {
     return res.status(httpStatus.NOT_IMPLEMENTED).json({ msg: err.message })
   }

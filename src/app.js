@@ -19,7 +19,7 @@ app.options('*', cors());
 app.use('/v1', routes);
 
 
-app.use(errorConverter);
+//app.use(errorConverter);
 app.use(errorHandler);
 
 //Express will handle synchronous errors automatically

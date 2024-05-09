@@ -1,10 +1,26 @@
-const {z}  = require('zod');
+const { number, object, optional, string } = require('superstruct');
 
 
-const createTask = z.object({
-  title: z.number({ message: "Title must be a number" }),
-  description: z.string({ message: "Description must be a string"}).optional(),
+
+
+const createTask = object({
+  title: string(),
+  description: optional(string()),
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 module.exports = {createTask}

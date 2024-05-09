@@ -4,8 +4,8 @@ const { toJSON } = require('../../config/db/plugins');
 
 const taskSchema = mongoose.Schema(
   {
-    title: {
-      type: Number,
+    priority: {
+      type: String,
       required: true,
       //   index: true,
       // },
@@ -14,7 +14,7 @@ const taskSchema = mongoose.Schema(
       //   ref: 'User',
       //   required: true,
     },
-    description: {
+    note: {
       type: String
     }
   },
