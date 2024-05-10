@@ -1,53 +1,19 @@
-const { pattern, string, refine, object, define} = require('superstruct');
+const { pattern, string, refine, object, define, number} = require('superstruct');
 
 const mongoRegex = /^[0-9a-fA-F]{24}$/;
-const one = pattern(string(), mongoRegex);
-const two = 'validMongoId'
 
-const isValid = (value) => {
-if(!mongoRegex.test(value)) return `Invalid MongoId`;
-return true
-};
+function isEmail(input) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(input) ? true: 'a valid email address';
+}
 
-const idStruct = 
-
-
-const validMongoId = () => pattern(string(), mongoRegex);
-// const custName = "objectIdValidator"
+function isValidMongo(input) {
+  const mongoRegex = /^[0-9a-fA-F]{24}$/;
+  return mongoRegex.test(input) ? true: {message: 'a valid mongo Id'};
+}
 
 
-// const isValid = (value) => mongoRegex.test(value);
+const Email = define('Email', isEmail)
+const MongoId = define('MongoId', isValidMongo)
 
-
-// const isGoodId = () => define('id', (value) => isValid(value));
-
-
-// const validMongoId = () => pattern(string(), mongoId);
-
-// const mongoValid = () => { refine(validMongoId, 'validMongo',(value) =>{
-//   if(!value.test(mongoId)) {
-//     return ("Invalid Mongo Id")
-//   }
-// })
-// }
-
-// const idValid = refine()
-
-
-
-// const goodMongoId = ()  => { 
-//   define('objectId', (value) => {
-//   if(mongoId.test(value)) {
-//     return []
-//   } else {
-//     return {
-//       path: [],
-//       message:`${context.path} must be a valid mongo id`,
-//     }
-//   }
-// })}
-
-module.exports = {validMongoId};
-
-
-
+module.exports = { Email, MongoId}

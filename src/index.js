@@ -5,8 +5,6 @@ const connectDB = require('./config/DB/connectDB');
 // Define port number
 const port = process.env.PORT || 5000;
 
-
-
 let server;
 
 const start = async () => {
@@ -21,4 +19,7 @@ const start = async () => {
 };
 
 start();
+
+
+
 

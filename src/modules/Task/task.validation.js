@@ -1,7 +1,5 @@
-const { boolean, enums, object, optional, string, pattern } = require('superstruct');
-const {validMongoId } = require('../../config/validators/custom.validators');
-
-
+const { boolean, enums, object, number, optional, string, pattern, validate } = require('superstruct');
+const {MongoId } = require('../../config/validators/custom.validators');
 
 const createTask =
  object({
@@ -10,15 +8,22 @@ const createTask =
   reminder: optional(boolean())
 });
 
-const getTask = 
-   object({
-    taskId: validMongoId()
-  });
+const getTask = object({
+  params: object({taskId: MongoId})
+})
 
-const updateTask = object({});
+const updateTask = object({
+  params: object({taskId: MongoId}),
+  body: object({
+    priority: optional(enums(['HIGH', 'LOW', 'MEDIUM'])),
+    note: optional(string()),
+    reminder: optional(boolean())
+})
+})
 
-const deleteTask = object({});
-
+const deleteTask = object({
+  params: object({taskId: MongoId})
+})
 
 
 
