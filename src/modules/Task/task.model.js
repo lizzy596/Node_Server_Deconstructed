@@ -6,7 +6,8 @@ const taskSchema = mongoose.Schema(
   {
     priority: {
       type: String,
-      required: true,
+      enum: ['HIGH', 'MEDIUM', 'LOW'],
+      default: 'LOW',
       //   index: true,
       // },
       // user: {
@@ -15,7 +16,12 @@ const taskSchema = mongoose.Schema(
       //   required: true,
     },
     note: {
-      type: String
+      type: String,
+      required: true
+    },
+    reminder: {
+      type: Boolean,
+      default: false
     }
   },
   {

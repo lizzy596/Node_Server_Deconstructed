@@ -21,16 +21,6 @@ const createTask = catchAsync(async (req, res) => {
 });
 
 
-
-
-
-
-
-
-
-
-
-
 const getTasks = async (req, res) => {
   const filter = pick(req.query, ['name', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);

@@ -1,12 +1,27 @@
-const { number, object, optional, string } = require('superstruct');
+const { boolean, enums, object, optional, string, pattern } = require('superstruct');
+const {validMongoId } = require('../../config/validators/custom.validators');
+
+
+
+const createTask =
+ object({
+  priority: optional(enums(['HIGH', 'LOW', 'MEDIUM'])),
+  note: string(),
+  reminder: optional(boolean())
+});
+
+const getTask = 
+   object({
+    taskId: validMongoId()
+  });
+
+const updateTask = object({});
+
+const deleteTask = object({});
 
 
 
 
-const createTask = object({
-  title: string(),
-  description: optional(string()),
-})
 
 
 
@@ -15,15 +30,7 @@ const createTask = object({
 
 
 
-
-
-
-
-
-
-
-
-module.exports = {createTask}
+module.exports = {createTask, getTask, updateTask, deleteTask}
 
 
 

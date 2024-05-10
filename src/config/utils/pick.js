@@ -1,11 +1,13 @@
-const pick = (object, keys) => {
-    return keys.reduce((obj, key) => {
-      if (object && Object.prototype.hasOwnProperty.call(object, key)) {
-        // eslint-disable-next-line no-param-reassign
-        obj[key] = object[key];
-      }
-      return obj;
-    }, {});
-  };
-  
-  module.exports = pick;
+const pick = (obj, keys) => {
+
+  let formatted = {};
+  keys.forEach((key) => {
+    if(JSON.stringify(obj[key]) !== '{}') {
+      formatted = obj[key];
+    }
+  })
+  return formatted;
+}
+
+
+module.exports = pick;
