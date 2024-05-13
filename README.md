@@ -7,3 +7,4 @@ npx tsc –init
 
 add express types
 added type:module to package.json
+add node types
