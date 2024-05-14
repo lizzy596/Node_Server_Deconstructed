@@ -1,7 +1,7 @@
-const httpStatus = require('http-status');
+const httpStatus = require("http-status");
 
 class ClientError extends Error {
-  constructor(code, message, stack='') {
+  constructor(code, message, stack = "") {
     super(message);
     this.code = code;
     this.message = message;

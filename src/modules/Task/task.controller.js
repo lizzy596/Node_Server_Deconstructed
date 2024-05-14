@@ -1,16 +1,12 @@
-const httpStatus = require('http-status');
-const taskService = require('./task.service');
-const catchAsync = require('../../config/utils/catchAsync');
-const ClientError = require('../../config/error/ClientError');
- 
-
-
-
+const httpStatus = require("http-status");
+const taskService = require("./task.service");
+const catchAsync = require("../../config/utils/catchAsync");
+const ClientError = require("../../config/error/ClientError");
 
 const getTask = catchAsync(async (req, res) => {
   const task = await taskService.getTaskById(req.params.taskId);
-  if(!task) {
-  throw ClientError.BadRequest('Task not found');
+  if (!task) {
+    throw ClientError.BadRequest("Task not found");
   }
   res.send(task);
 });
@@ -20,16 +16,13 @@ const createTask = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send(task);
 });
 
-
 const getTasks = async (req, res) => {
-  const filter = pick(req.query, ['name', 'role']);
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const { search } = pick(req.query, ['search']);
+  const filter = pick(req.query, ["name", "role"]);
+  const options = pick(req.query, ["sortBy", "limit", "page"]);
+  const { search } = pick(req.query, ["search"]);
   const result = await taskService.queryTasks(filter, options, search);
   res.send(result);
 };
-
-
 
 const updateTask = async (req, res) => {
   const task = await taskService.updateTaskById(req.params.taskId, req.body);
@@ -49,7 +42,6 @@ module.exports = {
   deleteTask,
 };
 
-
 //this is with no error handling at all, if there is no task, the user will not
 
 //get any feedback just a 200 status code and nothing returned
@@ -64,7 +56,7 @@ module.exports = {
 //   const task = await taskService.getTaskById(req.params.taskId);
 //   if(!task) {
 //     throw new Error('Task not found');
-//   } 
+//   }
 //   res.send(task);
 // };
 
@@ -74,7 +66,7 @@ module.exports = {
 //   if(!task) {
 //     throw new Error('Task not found');
 //     next();
-//   } 
+//   }
 //   res.send(task);
 // };
 
@@ -82,12 +74,12 @@ module.exports = {
 // const getTask = async (req, res, next) => {
 //   try {
 //     const task = await taskService.getTaskById(req.params.taskId);
-  
+
 //     if(!task) {
 //       throw new Error('Task not found');
-//     } 
+//     }
 //     res.send(task);
-     
+
 //   } catch (e) {
 //     next(e);
 
@@ -101,6 +93,6 @@ module.exports = {
 //     const task = await taskService.getTaskById(req.params.taskId);
 //     if(!task) {
 //     throw new Error('Task not found');
-//     } 
+//     }
 //     res.send(task);
 // });

@@ -9,7 +9,7 @@ const pick = (object, keys) => {
 
 module.exports = pick;
 
-//pick takes an object (like the request object) and an array of keys returns a new object with just those object properties that correspond to the given 
+//pick takes an object (like the request object) and an array of keys returns a new object with just those object properties that correspond to the given
 //list of keys
 //for ex. :
 
@@ -28,6 +28,5 @@ module.exports = pick;
 //     email: 'user@example.com'
 //   }
 // };
-
 
 //refined request object: {body: { username: 'example_user', email: 'user@example.com' },  query: { page: '1', limit: '10' }, params: { userId: '123' }}

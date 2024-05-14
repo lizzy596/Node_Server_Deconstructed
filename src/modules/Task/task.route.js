@@ -1,18 +1,18 @@
-const express = require('express');
-const taskController = require('./task.controller');
-const taskValidation = require('./task.validation');
-const validateInput = require('../../config/middlewares/validateInput');
+const express = require("express");
+const taskController = require("./task.controller");
+const taskValidation = require("./task.validation");
+const validateInput = require("../../config/middlewares/validateInput");
 
 const router = express.Router();
 
 router
-  .route('/')
+  .route("/")
   .post(validateInput(taskValidation.createTask), taskController.createTask)
   //.post(taskController.createTask)
-  .get( taskController.getTasks);
+  .get(taskController.getTasks);
 
 router
-  .route('/:taskId')
+  .route("/:taskId")
   //.get(validateInput(taskValidation.getTask), taskController.getTask)
   .get(taskController.getTask)
   .patch(validateInput(taskValidation.updateTask), taskController.updateTask)

@@ -1,12 +1,11 @@
-const express = require('express');
-const {taskRoute} = require('../../modules/Task');
+const express = require("express");
+const { taskRoute } = require("../../modules/Task");
 
 const router = express.Router();
 
-
 const defaultRoutes = [
   {
-    path: '/tasks',
+    path: "/tasks",
     route: taskRoute,
   },
 ];

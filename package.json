@@ -2,7 +2,6 @@
   "name": "NodePract",
   "type": "module",
   "sourceType": "module",
-
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -17,12 +16,25 @@
     "superstruct": "^1.0.4"
   },
   "scripts": {
-    "start": "cross-env NODE_ENV=development nodemon src/index.js"
+    "dev": "nodemon src/index.ts",
+    "build": "npx tsc",
+    "start": "cross-env NODE_ENV=development nodemon ts-node -esm src/index.ts",
+    "startTs": "cross-env NODE_ENV=development node dist/index.js",
+    "lint": "eslint src/**/*.ts",
+    "format": "eslint src/**/*.ts --fix",
+    "prettier": "prettier --check **/*.ts",
+    "prettier:fix": "prettier --write **/*.ts"
   },
   "devDependencies": {
+    "@eslint/js": "^9.2.0",
     "@types/express": "^4.17.21",
     "@types/node": "^20.12.11",
+    "concurrently": "^8.2.2",
+    "eslint": "^9.2.0",
     "nodemon": "^3.1.0",
-    "typescript": "^5.4.5"
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.9.0"
   }
 }

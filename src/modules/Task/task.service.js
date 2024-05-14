@@ -1,12 +1,9 @@
-const Task = require('./task.model');
-const { paginate } = require('../../config/db/plugins');
-
-
+const Task = require("./task.model");
+const { paginate } = require("../../config/db/plugins");
 
 const createTask = async (taskBody) => {
   return Task.create(taskBody);
 };
-
 
 const queryTasks = async (filter, options, search) => {
   const Tasks = await Task.paginate(filter, options, search);
@@ -23,7 +20,6 @@ const updateTaskById = async (taskId, updateBody) => {
   await task.save();
   return task;
 };
-
 
 const deleteTaskById = async (taskId) => {
   const task = await getTaskById(taskId);

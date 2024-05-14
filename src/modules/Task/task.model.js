@@ -1,13 +1,12 @@
-const mongoose = require('mongoose');
-const { toJSON } = require('../../config/db/plugins');
-
+const mongoose = require("mongoose");
+const { toJSON } = require("../../config/db/plugins");
 
 const taskSchema = mongoose.Schema(
   {
     priority: {
       type: String,
-      enum: ['HIGH', 'MEDIUM', 'LOW'],
-      default: 'LOW',
+      enum: ["HIGH", "MEDIUM", "LOW"],
+      default: "LOW",
       //   index: true,
       // },
       // user: {
@@ -17,22 +16,21 @@ const taskSchema = mongoose.Schema(
     },
     note: {
       type: String,
-      required: true
+      required: true,
     },
     reminder: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // add plugin that converts mongoose to json
 taskSchema.plugin(toJSON);
 
-
-const Task = mongoose.model('Task', taskSchema);
+const Task = mongoose.model("Task", taskSchema);
 
 module.exports = Task;
