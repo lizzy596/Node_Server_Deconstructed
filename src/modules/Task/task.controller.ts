@@ -6,7 +6,7 @@ import ClientError from '../../config/error/ClientError.js';
 import pick from 'config/utils/pick.js';
 
 const getTask = catchAsync(async (req: Request, res: Response) => {
-  const task = await taskService.getTaskById(req.params.taskId);
+  const task = await taskService.getTaskById(req.params.taskId!);
   if (!task) {
     throw ClientError.BadRequest("Task not found");
   }
@@ -27,12 +27,12 @@ const getTasks = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateTask = catchAsync(async (req: Request, res: Response) => {
-  const task = await taskService.updateTaskById(req.params.taskId, req.body);
+  const task = await taskService.updateTaskById(req.params.taskId!, req.body);
   res.send(task);
 });
 
 const deleteTask = catchAsync(async (req: Request, res: Response) => {
-  await taskService.deleteTaskById(req.params.taskId);
+  await taskService.deleteTaskById(req.params.taskId!);
   res.status(httpStatus.NO_CONTENT).send();
 });
 

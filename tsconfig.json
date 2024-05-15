@@ -8,8 +8,8 @@
   "compilerOptions": {
     "lib": ["es2023"],
     "outDir": "dist",
-    "module": "es6",
-    "moduleResolution": "node",
+    "module": "node16",
+    "moduleResolution": "node16",
     "removeComments": true,
     "resolveJsonModule": true,
     "target": "es2022",

@@ -1,6 +1,6 @@
-import config from 'config/config';
-import app from './app';
-import connectDB from 'config/db/connectDB';
+import config from 'config/config.js';
+import app from './app.js';
+import connectDB from 'config/db/connectDB.js';
 
 
 

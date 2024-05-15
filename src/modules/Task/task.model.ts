@@ -1,5 +1,6 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Model, Schema, Document } from "mongoose";
 import toJSON from "../../config/db/plugins/toJSON.plugin.js";
+import paginate from "config/db/plugins/paginate.plugin.js";
 
 export interface TaskDocument extends Document {
   priority: string;
@@ -8,6 +9,7 @@ export interface TaskDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
 
 const taskSchema: Schema<TaskDocument> = new Schema(
   {
@@ -24,7 +26,9 @@ const taskSchema: Schema<TaskDocument> = new Schema(
       type: Boolean,
       default: false,
     },
+    
   },
+
   {
     timestamps: true,
   }
@@ -32,6 +36,12 @@ const taskSchema: Schema<TaskDocument> = new Schema(
 
 // add plugin that converts mongoose to json
 taskSchema.plugin(toJSON);
+taskSchema.plugin(paginate);
+
+taskSchema.statics.searchableFields = function () {
+  return ['priority', 'note'];
+};
+
 
 const Task = mongoose.model<TaskDocument>("Task", taskSchema);
 

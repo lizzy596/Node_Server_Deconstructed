@@ -1,10 +1,4 @@
-import {
-  boolean,
-  enums,
-  object,
-  optional,
-  string
-} from "superstruct";
+const { boolean, object, enums, optional, string} = require('superstruct');
 
 import { MongoId } from "../../config/validators/custom.validators.js";
 

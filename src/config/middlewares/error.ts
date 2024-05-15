@@ -7,7 +7,7 @@ const config = { env: "development" };
 
 // Converts mongoose errors to client errors
 // You must also pass the err to next, so that any errors that are not mongoose.errors are still passed down the chain.
-const errorConverter = (err: any, req: Request, res: Response, next: NextFunction) => {
+const errorConverter = (err: any, _req: Request, _res: Response, next: NextFunction) => {
   if (err) {
     if (err instanceof mongoose.Error) {
       throw new ClientError(httpStatus.BAD_REQUEST, "Invalid field input");
@@ -18,7 +18,7 @@ const errorConverter = (err: any, req: Request, res: Response, next: NextFunctio
 };
 
 // Returns either a client error or a general error
-const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+const errorHandler = (err: any, _req: Request, res: Response, _next: NextFunction) => {
   const response = {
     code: err.code || httpStatus.INTERNAL_SERVER_ERROR,
     message: err.code

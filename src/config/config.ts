@@ -1,11 +1,4 @@
-import {
-  enums,
-  defaulted,
-  object,
-  number,
-  string,
-  validate,
-}  from "superstruct";
+const { enums, defaulted, validate, object, number, string} = require('superstruct');
 import 'dotenv/config';
 
 const envVarsSchema = object({

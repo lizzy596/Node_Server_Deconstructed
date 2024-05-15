@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-
 import { Document, Model, Schema } from 'mongoose';
 
 interface QueryResult {
@@ -9,6 +7,9 @@ interface QueryResult {
   totalPages: number;
   totalResults: number;
 }
+
+
+
 
 function removeEmptyProps<T extends Record<string, any>>(obj: T): Partial<T> {
   return Object.keys(obj).reduce((acc, prop) => {

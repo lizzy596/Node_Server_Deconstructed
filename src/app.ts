@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
 import cors from 'cors';
-import routes from './routes/v1';
+import routes from './routes/v1/index.js';
 import { errorHandler, errorConverter } from './config/middlewares/error.js';
 import ClientError from './config/error/ClientError.js';
 
@@ -21,7 +21,7 @@ app.options("*", cors());
 app.use("/v1", routes);
 
 //The 404 Route (ALWAYS Keep this as the last route)
-app.use((req, res, next) => {
+app.use((_req, _res, next) => {
   next(ClientError.NotFound("Resource not found"));
 });
 
