@@ -1,11 +1,12 @@
-const express = require("express");
-const cors = require("cors");
-const routes = require("./routes/v1");
-const { errorHandler, errorConverter } = require("./config/middlewares/error");
-const ClientError = require("./config/error/ClientError");
+import express, { Express } from 'express';
+import cors from 'cors';
+import routes from './routes/v1';
+import { errorHandler, errorConverter } from './config/middlewares/error.js';
+import ClientError from './config/error/ClientError.js';
+
 
 // Creates an instance of Express
-const app = express();
+const app: Express = express();
 
 // parse json request body
 app.use(express.json());
@@ -27,5 +28,5 @@ app.use((req, res, next) => {
 app.use(errorConverter);
 app.use(errorHandler);
 
-//export app
-module.exports = app;
+
+export default app;

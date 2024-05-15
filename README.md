@@ -74,3 +74,33 @@ In other words, use Prettier for formatting and linters for catching bugs!
 
 create .pretterrc
 added scripts to package.json
+
+
+
+module and moduleResolution
+
+The first thing that needs clarification is the difference the module and moduleResolution compiler options. The former is an emit setting: what module-related code will tsc be willing to emit to JS? The easiest way to see the effect of this option is by toggling between settings commonjs and esnext:
+Input code 	Output --module commonjs 	Output --module esnext
+import { createSourceFile } from "typescript" 	"use strict"; Object.defineProperty(exports, "__esModule", { value: true }); const typescript_1 = require("typescript"); 	import { createSourceFile } from "typescript"
+
+While this setting fundamentally controls emit, it can impose limitations on what module-related input code is allowed. For example, you cannot write imports in the style of import fs = require("fs") under --module es2015 (or higher ES targets) because there is no require to speak of in the ES module system. Additionally, using top-level await is only allowed in --module es2022 (or higher) or system because it requires corresponding support in the module loading system.
+
+On the other hand, --moduleResolution is all about the algorithm used to answer the question “given a file system and some input file containing an import from "lodash", what files should I look for to find that module?” Obviously, the decision to look in a folder with a magical name node_modules is one related to Node (albeit one that a huge amount of non-Node tooling has copied for convenience), and is not going to be correct for every possible runtime.
+Differences in moduleResolution
+
+With this context, we’re ready to begin answering your question directly. The biggest, most noticeable difference between --module nodenext and --module esnext is that the former implies --moduleResolution nodenext, a new resolution mode designed for Node’s specific implementation of co-existing ESM and CJS, while the latter does not imply a moduleResolution setting because there is no such corresponding setting in TypeScript right now. Put another way, when you say you’re using --module esnext, you’re allowed to write, and we will emit, the latest and greatest ES module code constructs, but we will not do anything differently with deciding how imports resolve. You’ll likely continue using --moduleResolution node, which was designed for Node’s implementation of CJS. What does this mean for you? If you’re writing ESM for Node, you can probably make some stuff work with --module esnext and --moduleResolution node, but newer Node-specific features like package.json exports won’t work, and it will be extremely easy to shoot yourself in the foot when writing import paths. Paths will be evaluated by tsc under Node’s CJS rules, but then at runtime, Node will evaluate them under its ESM rules since you’re emitting ESM. There are significant differences between these algorithms—notably, the latter requires relative imports to use file extensions instead of dropping the .js, and index files have no special meaning, so you can’t import the index file just by naming the path to the directory.
+Differences in module
+
+The difference observable in the --module setting itself is a bit more subtle. As I mentioned before, in esnext you aren’t allowed to write import Foo = require("bar") because we assume there is no require. In nodenext, we know that a given module might be an ES module or it might be a CJS module, based on its file extension (.mts → .mjs implies ESM and .cts → .cjs implies CJS) and/or the type field in the nearest package.json file. --module nodenext enables looking at these things to make decisions about what kind of module a given file is, which controls what kind of module output we emit. If the aforementioned conditions result in a module being interpreted as CJS, the output for that file is nearly identical (maybe identical?) to what you’d get from --module commonjs. If the module is interpreted as ESM, the output is very similar to what you’d get from --module esnext, with one exception I can recall off the top of my head: you’re still allowed to write import Foo = require("bar"), and that gets compiled to:
+
+import { createRequire as _createRequire } from "module";
+const __require = _createRequire(import.meta.url);
+const Foo = __require("bar");
+
+Summary
+
+I think the answer to your question can be summarized like this:
+
+    Node 12+ has support for CJS and ESM side-by-side, indicated by package.json type and special file extensions, so we need a module emit mode that understands that stuff. That mode can be thought of roughly as a Node-based selector between the existing commonjs and esnext modes, with a few additional little differences tailored to Node.
+    Node 12+ also brings major new features to how module specifiers in packages can resolve, and enforces a different and much stricter resolution algorithm specifically for ESM imports. Without a matching TypeScript resolution mode, we both fail to resolve in the face of those new features and let you write paths that won’t resolve in ESM resolution.
+

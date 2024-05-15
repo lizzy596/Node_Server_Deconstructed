@@ -1,13 +1,12 @@
-const pick = (object, keys) => {
-  return keys.reduce((obj, key) => {
+const pick = (object: Record<string, any>, keys: string[]) =>
+  keys.reduce((obj: any, key: string) => {
     if (object && Object.prototype.hasOwnProperty.call(object, key)) {
       obj[key] = object[key];
     }
     return obj;
   }, {});
-};
 
-module.exports = pick;
+export default pick;
 
 //pick takes an object (like the request object) and an array of keys returns a new object with just those object properties that correspond to the given
 //list of keys

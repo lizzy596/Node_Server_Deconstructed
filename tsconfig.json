@@ -1,5 +1,5 @@
 {
-  "extends": "ts-node/node16/tsconfig.json",
+ 
   "ts-node": {
     "transpileOnly": true,
     "files": true,
@@ -7,13 +7,15 @@
   },
   "compilerOptions": {
     "lib": ["es2023"],
-    "outDir": "./dist",
-    "module": "node16",
+    "outDir": "dist",
+    "module": "es6",
+    "moduleResolution": "node",
     "removeComments": true,
+    "resolveJsonModule": true,
     "target": "es2022",
     "baseUrl": "./src",
     "esModuleInterop": true,
-    "moduleResolution": "node16",
+    "strictNullChecks": true,
     "paths": {},
     "sourceMap": true,
     "sourceRoot": "/src",
@@ -21,8 +23,10 @@
     "noImplicitReturns": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*.ts"],
+
   "exclude": ["node_modules", "dist"]
 }

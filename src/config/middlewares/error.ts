@@ -1,0 +1,33 @@
+import { Request, Response, NextFunction } from 'express';
+import ClientError from '../error/ClientError.js';
+import httpStatus from 'http-status';
+import mongoose from 'mongoose';
+
+const config = { env: "development" };
+
+// Converts mongoose errors to client errors
+// You must also pass the err to next, so that any errors that are not mongoose.errors are still passed down the chain.
+const errorConverter = (err: any, req: Request, res: Response, next: NextFunction) => {
+  if (err) {
+    if (err instanceof mongoose.Error) {
+      throw new ClientError(httpStatus.BAD_REQUEST, "Invalid field input");
+    } else {
+      next(err);
+    }
+  }
+};
+
+// Returns either a client error or a general error
+const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+  const response = {
+    code: err.code || httpStatus.INTERNAL_SERVER_ERROR,
+    message: err.code
+      ? err.message
+      : "Something went wrong, please try again later.",
+    stack: config.env === "development" ? err.stack : null,
+  };
+  return res.status(response.code).send(response);
+};
+
+export { errorHandler, errorConverter };
+

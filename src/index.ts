@@ -1,17 +1,17 @@
-require("dotenv").config();
-const app = require("./app");
-const connectDB = require("./config/DB/connectDB");
+import config from 'config/config';
+import app from './app';
+import connectDB from 'config/db/connectDB';
 
-// Define port number
-const port = process.env.PORT || 5000;
+
+
 
 let server;
 
 const start = async () => {
   try {
-    await connectDB(process.env.MONGO_URL);
-    server = app.listen(port, () =>
-      console.log(`Server is listening on port ${port}...`),
+    await connectDB(config.mongoose.url);
+    server = app.listen(config.port, () =>
+      console.log(`Server is listening on port ${config.port}...`),
     );
   } catch (error) {
     console.log(error);
