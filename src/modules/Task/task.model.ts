@@ -1,4 +1,4 @@
-import mongoose, { Model, Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, plugin } from "mongoose";
 import toJSON from "../../config/db/plugins/toJSON.plugin.js";
 import paginate from "config/db/plugins/paginate.plugin.js";
 
@@ -9,6 +9,7 @@ export interface TaskDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
 
 
 const taskSchema: Schema<TaskDocument> = new Schema(

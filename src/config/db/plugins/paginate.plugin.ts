@@ -1,20 +1,21 @@
-import { Document, Model, Schema } from 'mongoose';
-
-interface QueryResult {
-  results: Document[];
+export interface QueryResult {
+  results: any[]; // Update this to the appropriate type
   page: number;
   limit: number;
   totalPages: number;
   totalResults: number;
 }
 
+export interface Options {
+  sortBy?: string;
+  populate?: string;
+  limit?: number;
+  page?: number;
+}
 
-
-
-function removeEmptyProps<T extends Record<string, any>>(obj: T): Partial<T> {
+function removeEmptyProps(obj: Record<string, any>): Record<string, any> {
   return Object.keys(obj).reduce((acc, prop) => {
-    if (obj[prop] === "") return acc;
-
+    if (obj[prop] === '') return acc;
     return {
       ...acc,
       [prop]: obj[prop],
@@ -22,20 +23,9 @@ function removeEmptyProps<T extends Record<string, any>>(obj: T): Partial<T> {
   }, {});
 }
 
-const paginate = (schema: Schema<Document>): void => {
-  schema.statics.paginate = async function (
-    this: Model<Document>,
-    unCheckedFilter: Record<string, any>,
-    options: {
-      sortBy?: string;
-      populate?: string;
-      limit?: number;
-      page?: number;
-    },
-    search?: string
-  ): Promise<QueryResult> {
+const paginate = (schema: any): void => {
+  schema.statics.paginate = async function (unCheckedFilter: Record<string, any>, options: IOptions, search: string): Promise<QueryResult> {
     const filter = removeEmptyProps(unCheckedFilter);
-
     if (filter?.startDate) {
       Object.assign(filter, {
         createdAt: {
@@ -49,61 +39,48 @@ const paginate = (schema: Schema<Document>): void => {
       Object.assign(filter, {
         createdAt: {
           ...filter.createdAt,
-          $lt: new Date(
-            new Date(parseInt(filter.endDate, 10)).setDate(
-              new Date(parseInt(filter.endDate, 10)).getDate() + 1,
-            ),
-          ),
+          $lt: new Date(new Date(parseInt(filter.endDate, 10)).setDate(new Date(parseInt(filter.endDate, 10)).getDate() + 1)),
         },
       });
       delete filter.endDate;
     }
 
-    let sort = "";
+    let sort = '';
     if (options.sortBy) {
-      const sortingCriteria:string[]= [];
-      options.sortBy.split(",").forEach((sortOption) => {
-        const [key, order] = sortOption.split(":");
-        sortingCriteria.push((order === "desc" ? "-" : "") + key);
+      const sortingCriteria: string[] = [];
+      options.sortBy.split(',').forEach((sortOption: string) => {
+        const [key, order] = sortOption.split(':');
+        sortingCriteria.push((order === 'desc' ? '-' : '') + key);
       });
-      sort = sortingCriteria.join(" ");
+      sort = sortingCriteria.join(' ');
     } else {
-      sort = "createdAt";
+      sort = 'createdAt';
     }
 
-    const limit =
-      options.limit && parseInt(options.limit.toString(), 10) > 0
-        ? parseInt(options.limit.toString(), 10)
-        : 10;
-    const page =
-      options.page && parseInt(options.page.toString(), 10) > 0
-        ? parseInt(options.page.toString(), 10)
-        : 1;
+    const limit = options.limit && parseInt(options.limit.toString(), 10) > 0 ? parseInt(options.limit.toString(), 10) : 10;
+    const page = options.page && parseInt(options.page.toString(), 10) > 0 ? parseInt(options.page.toString(), 10) : 1;
     const skip = (page - 1) * limit;
 
-    const searchFilter = [...this.searchableFields()].map((field) => {
+    const searchFilter = [...this.searchableFields()].map((field: string) => {
       return {
-        [field]: { $regex: search, $options: "i" },
+        [field]: { $regex: search, $options: 'i' },
       };
     });
     const searchQuery = search ? { $or: searchFilter } : {};
 
-    const countPromise = this.countDocuments({
-      ...filter,
-      ...searchQuery,
-    }).exec();
+    const countPromise = this.countDocuments({ ...filter, ...searchQuery }).exec();
     let docsPromise = this.find({ ...filter, ...searchQuery })
       .sort(sort)
       .skip(skip)
       .limit(limit);
 
     if (options.populate) {
-      options.populate.split(",").forEach((populateOption) => {
+      options.populate.split(',').forEach((populateOption: string) => {
         docsPromise = docsPromise.populate(
           populateOption
-            .split(".")
+            .split('.')
             .reverse()
-            .reduce((a, b) => ({ path: b, populate: a }))
+            .reduce((a: string, b: string) => ({ path: b, populate: a }))
         );
       });
     }
@@ -126,3 +103,4 @@ const paginate = (schema: Schema<Document>): void => {
 };
 
 export default paginate;
+

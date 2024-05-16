@@ -1,10 +1,10 @@
 import Task, { TaskDocument } from "./task.model.js";
-import paginate from "config/db/plugins/paginate.plugin.js";
+import {Options, QueryResult} from "config/db/plugins/paginate.plugin.js";
 export const createTask = async (taskBody: any): Promise<TaskDocument> => {
   return Task.create(taskBody);
 };
 
-export const queryTasks = async (filter: any, options: any, search: string): Promise<any> => {
+export const queryTasks = async (filter: Record<string, any>, options: Options, search: string): Promise<QueryResult> => {
   const Tasks = await Task.paginate(filter, options, search);
   return Tasks;
 };
