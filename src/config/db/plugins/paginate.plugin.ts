@@ -1,53 +1,45 @@
+import { Schema, Document } from 'mongoose';
+
 export interface QueryResult {
-  results: any[]; // Update this to the appropriate type
+  results: Document[];
   page: number;
   limit: number;
   totalPages: number;
   totalResults: number;
 }
 
-export interface Options {
+export interface IOptions {
   sortBy?: string;
+  projectBy?: string;
   populate?: string;
   limit?: number;
   page?: number;
 }
 
-function removeEmptyProps(obj: Record<string, any>): Record<string, any> {
-  return Object.keys(obj).reduce((acc, prop) => {
-    if (obj[prop] === '') return acc;
-    return {
-      ...acc,
-      [prop]: obj[prop],
-    };
-  }, {});
-}
-
-const paginate = (schema: any): void => {
-  schema.statics.paginate = async function (unCheckedFilter: Record<string, any>, options: IOptions, search: string): Promise<QueryResult> {
-    const filter = removeEmptyProps(unCheckedFilter);
-    if (filter?.startDate) {
-      Object.assign(filter, {
-        createdAt: {
-          ...filter.createdAt,
-          $gte: new Date(parseInt(filter.startDate, 10)),
-        },
-      });
-      delete filter.startDate;
-    }
-    if (filter?.endDate) {
-      Object.assign(filter, {
-        createdAt: {
-          ...filter.createdAt,
-          $lt: new Date(new Date(parseInt(filter.endDate, 10)).setDate(new Date(parseInt(filter.endDate, 10)).getDate() + 1)),
-        },
-      });
-      delete filter.endDate;
-    }
-
-    let sort = '';
+const paginate = (schema: Schema): void => {
+  /**
+   * @typedef {Object} QueryResult
+   * @property {Document[]} results - Results found
+   * @property {number} page - Current page
+   * @property {number} limit - Maximum number of results per page
+   * @property {number} totalPages - Total number of pages
+   * @property {number} totalResults - Total number of documents
+   */
+  /**
+   * Query for documents with pagination
+   * @param {Object} [filter] - Mongo filter
+   * @param {Object} [options] - Query options
+   * @param {string} [options.sortBy] - Sorting criteria using the format: sortField:(desc|asc). Multiple sorting criteria should be separated by commas (,)
+   * @param {string} [options.populate] - Populate data fields. Hierarchy of fields should be separated by (.). Multiple populating criteria should be separated by commas (,)
+   * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+   * @param {number} [options.page] - Current page (default = 1)
+   * @param {string} [options.projectBy] - Fields to hide or include (default = '')
+   * @returns {Promise<QueryResult>}
+   */
+  schema.static('paginate', async function (filter: Record<string, any>, options: IOptions): Promise<QueryResult> {
+    let sort: string = '';
     if (options.sortBy) {
-      const sortingCriteria: string[] = [];
+      const sortingCriteria: any = [];
       options.sortBy.split(',').forEach((sortOption: string) => {
         const [key, order] = sortOption.split(':');
         sortingCriteria.push((order === 'desc' ? '-' : '') + key);
@@ -57,25 +49,27 @@ const paginate = (schema: any): void => {
       sort = 'createdAt';
     }
 
+    let project: string = '';
+    if (options.projectBy) {
+      const projectionCriteria: string[] = [];
+      options.projectBy.split(',').forEach((projectOption) => {
+        const [key, include] = projectOption.split(':');
+        projectionCriteria.push((include === 'hide' ? '-' : '') + key);
+      });
+      project = projectionCriteria.join(' ');
+    } else {
+      project = '-createdAt -updatedAt';
+    }
+
     const limit = options.limit && parseInt(options.limit.toString(), 10) > 0 ? parseInt(options.limit.toString(), 10) : 10;
     const page = options.page && parseInt(options.page.toString(), 10) > 0 ? parseInt(options.page.toString(), 10) : 1;
     const skip = (page - 1) * limit;
 
-    const searchFilter = [...this.searchableFields()].map((field: string) => {
-      return {
-        [field]: { $regex: search, $options: 'i' },
-      };
-    });
-    const searchQuery = search ? { $or: searchFilter } : {};
-
-    const countPromise = this.countDocuments({ ...filter, ...searchQuery }).exec();
-    let docsPromise = this.find({ ...filter, ...searchQuery })
-      .sort(sort)
-      .skip(skip)
-      .limit(limit);
+    const countPromise = this.countDocuments(filter).exec();
+    let docsPromise = this.find(filter).sort(sort).skip(skip).limit(limit).select(project);
 
     if (options.populate) {
-      options.populate.split(',').forEach((populateOption: string) => {
+      options.populate.split(',').forEach((populateOption: any) => {
         docsPromise = docsPromise.populate(
           populateOption
             .split('.')
@@ -90,7 +84,7 @@ const paginate = (schema: any): void => {
     return Promise.all([countPromise, docsPromise]).then((values) => {
       const [totalResults, results] = values;
       const totalPages = Math.ceil(totalResults / limit);
-      const result: QueryResult = {
+      const result = {
         results,
         page,
         limit,
@@ -99,7 +93,7 @@ const paginate = (schema: any): void => {
       };
       return Promise.resolve(result);
     });
-  };
+  });
 };
 
 export default paginate;
