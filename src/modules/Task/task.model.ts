@@ -1,7 +1,6 @@
 import mongoose, {Schema, Model, Document} from "mongoose";
 import toJSON from "../../config/db/plugins/toJSON.plugin.js";
 import paginate from "config/db/plugins/paginate.plugin.js";
-//import { Paginator } from "config/db/plugins/paginate.plugin.js";
 
 export interface Paginator {
   paginate(): void
@@ -51,7 +50,7 @@ const taskSchema = new Schema<ITask, TaskModel>(
     statics: {
      searchableFields() {
       return [] as string[]
-     }
+     },
     
   },
  
@@ -76,6 +75,8 @@ taskSchema.plugin(paginate);
 taskSchema.statics.searchableFields = function () {
  return ['priority', 'note'];
 };
+
+taskSchema.statics.paginate = paginate;
 
 
 const Task = mongoose.model<ITask, TaskModel>("Task", taskSchema);
