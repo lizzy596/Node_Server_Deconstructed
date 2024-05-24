@@ -6,7 +6,7 @@ This is a very basic Node REST server with no frameworks, just vanilla node.js.
 
 Node is an asynchronous event-driven JavaScript runtime
 
-This is in contrast to today's more common concurrency model, in which OS threads are employed. Thread-based networking is relatively inefficient and very difficult to use. Furthermore, users of Node.js are free from worries of dead-locking the process, since there are no locks. Almost no function in Node.js directly performs I/O, so the process never blocks except when the I/O is performed using synchronous methods of Node.js standard library. Because nothing blocks, scalable systems are very reasonable to develop in Node.js.
+This is in contrast to today's more common concurrency model, in which OS threads are employed. Thread-based networking is relatively inefficient and very difficult to use. Furthermore, users of Node.js are free from worries of dead-locking the process, since there are no locks. **Almost no function in Node.js directly performs I/O, so the process never blocks except when the I/O is performed using synchronous methods of Node.js** standard library. Because nothing blocks, scalable systems are very reasonable to develop in Node.js.
 
 Blocking is when the execution of additional JavaScript in the Node.js process must wait until a non-JavaScript operation completes. This happens because the event loop is unable to continue running JavaScript while a blocking operation is occurring.
 
@@ -204,3 +204,7 @@ HTTP Mesage:
 3. body -actual stuff
 
 For the homepage the / is added by the browser http://localhost/
+
+
+
+To-Do: Add example using worker threads in node
