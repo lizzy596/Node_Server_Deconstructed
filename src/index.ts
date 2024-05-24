@@ -1,24 +1,37 @@
 
 import config from 'config/config.js';
 import app from './app.js';
-import connectDB from 'config/db/connectDB.js';
+import mongoose from 'mongoose';
 
 
+let server: any;
+mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
 
+  server = app.listen(config.port, () => {
+    console.log(`Listening to port ${config.port}`);
+  });
+});
 
-
-const start = async () => {
-
-  try {
-    
-
-    await connectDB(config.mongoose.url);
-    app.listen(config.port, () =>
-      console.log(`Server is listening on port ${config.port}...`),
-    );
-  } catch (error) {
-    console.log(error);
+const exitHandler = () => {
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  } else {
+    process.exit(1);
   }
 };
 
-start();
+const unexpectedErrorHandler = (error: string) => {
+  console.log(error);
+  exitHandler();
+};
+
+process.on('uncaughtException', unexpectedErrorHandler);
+process.on('unhandledRejection', unexpectedErrorHandler);
+
+process.on('SIGTERM', () => {
+  if (server) {
+    server.close();
+  }
+});
