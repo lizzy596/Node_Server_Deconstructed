@@ -104,3 +104,35 @@ I think the answer to your question can be summarized like this:
     Node 12+ has support for CJS and ESM side-by-side, indicated by package.json type and special file extensions, so we need a module emit mode that understands that stuff. That mode can be thought of roughly as a Node-based selector between the existing commonjs and esnext modes, with a few additional little differences tailored to Node.
     Node 12+ also brings major new features to how module specifiers in packages can resolve, and enforces a different and much stricter resolution algorithm specifically for ESM imports. Without a matching TypeScript resolution mode, we both fail to resolve in the face of those new features and let you write paths that won’t resolve in ESM resolution.
 
+Sure! Here are the most important parts of a tsconfig.json file, described without code examples:
+1. Compiler Options
+
+This section contains settings that control the behavior of the TypeScript compiler. Key options include:
+
+    target: Specifies the version of ECMAScript to which TypeScript code will be compiled.
+    module: Defines the module system used (e.g., CommonJS, ES6).
+    strict: Enables all strict type-checking options.
+    outDir: Specifies the output directory for the compiled JavaScript files.
+    rootDir: Defines the root directory of the source files.
+    esModuleInterop: Ensures compatibility between CommonJS and ES Modules.
+    forceConsistentCasingInFileNames: Enforces case-sensitive file names.
+    moduleResolution: Determines how modules are resolved (e.g., Node, classic).
+    declaration: Generates TypeScript declaration files (.d.ts).
+    sourceMap: Produces source map files for debugging.
+
+2. Include and Exclude
+
+These properties control which files are included or excluded from the compilation process.
+
+    include: Lists file patterns to be included in the project.
+    exclude: Lists file patterns to be excluded from the project.
+
+3. Paths Mapping
+
+Allows defining custom module paths and aliases for easier import paths.
+4. Base URL
+
+Sets the base directory for resolving non-relative module names.
+5. Type Declarations
+
+Specifies type declaration files to be included in the compilation, and can also define directories where type declaration files are located.
