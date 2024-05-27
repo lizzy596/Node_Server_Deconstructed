@@ -1,5 +1,4 @@
-const { boolean, object, enums, optional, string} = require('superstruct');
-
+import { boolean, object, enums, optional, string} from 'superstruct';
 import { MongoId } from "../../config/validators/custom.validators.js";
 
 export const createTask = object({
