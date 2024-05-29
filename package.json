@@ -17,6 +17,7 @@
     "dev": "nodemon src/index.ts",
     "build": "npx tsc",
     "start": "cross-env NODE_ENV=development nodemon ts-node -esm src/index.ts",
+    "start2": "tsc --watch & cross-env NODE_ENV=development node --watch dist/index.js",
     "startTs": "cross-env NODE_ENV=development node dist/index.js",
     "lint": "eslint src/**/*.ts",
     "format": "eslint src/**/*.ts --fix",

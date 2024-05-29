@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import * as taskService from './task.service.js';
 import catchAsync from '../../config/utils/catchAsync.js';
 import ClientError from '../../config/error/ClientError.js';
-import pick from 'config/utils/pick.js';
+import pick from '../../config/utils/pick.js';
 
 const getTask = catchAsync(async (req: Request, res: Response) => {
   const task = await taskService.getTaskById(req.params.taskId!);

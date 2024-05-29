@@ -1,5 +1,5 @@
 
-import config from 'config/config.js';
+import config from './config/config.js';
 import app from './app.js';
 import mongoose from 'mongoose';
 

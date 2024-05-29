@@ -8,7 +8,7 @@ export const createTask = async (taskBody: any): Promise<ITask> => {
 };
 
 export const queryTasks = async (filter: Record<string, any>, options: IOptions, search: string): Promise<QueryResult> => {
-   // @ts-ignore 
+  //@ts-ignore
   const Tasks = await Task.paginate(filter, options, search);
   return Tasks;
 };

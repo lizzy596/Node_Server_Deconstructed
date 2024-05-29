@@ -1,6 +1,6 @@
 import mongoose, {Schema, Model, Document} from "mongoose";
 import toJSON from "../../config/db/plugins/toJSON.plugin.js";
-import paginate from "config/db/plugins/paginate.plugin.js";
+import paginate from "../../config/db/plugins/paginate.plugin.js";
 
 export interface Paginator {
   paginate(): void

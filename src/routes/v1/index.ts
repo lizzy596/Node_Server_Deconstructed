@@ -1,6 +1,6 @@
 import express, { Router } from 'express';
 import taskRoute from '../../modules/Task/task.route.js'
-import config from 'config/config.js';
+import config from '../../config/config.js';
 
 const router: Router = express.Router();
 
