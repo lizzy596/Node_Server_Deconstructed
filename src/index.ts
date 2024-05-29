@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 
 let server: any;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
-
+console.log('connected to mongoDB')
   server = app.listen(config.port, () => {
     console.log(`Listening to port ${config.port}`);
   });
