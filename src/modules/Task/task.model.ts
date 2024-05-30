@@ -20,7 +20,7 @@ export interface TaskModel extends Model<ITask, {}> {
 
 
 
-const taskSchema = new Schema<ITask, TaskModel>(
+const schema = new Schema<ITask, TaskModel>(
   {
     priority: {
       type: String,
@@ -60,8 +60,8 @@ const taskSchema = new Schema<ITask, TaskModel>(
 );
 
 // add plugin that converts mongoose to json
-taskSchema.plugin(toJSON);
-taskSchema.plugin(paginate);
+schema.plugin(toJSON);
+schema.plugin(paginate);
 
 // taskSchema.pre('save', function(next) {
 //   const now = Date.now();
@@ -72,14 +72,14 @@ taskSchema.plugin(paginate);
 //   next();
 // });
 
-taskSchema.statics.searchableFields = function () {
+schema.statics.searchableFields = function () {
  return ['priority', 'note'];
 };
 
-taskSchema.statics.paginate = paginate;
+schema.statics.paginate = paginate;
 
 
-const Task = mongoose.model<ITask, TaskModel>("Task", taskSchema);
+const Task = mongoose.model<ITask, TaskModel>("Task", schema);
 
 export default Task;
 
