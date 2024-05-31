@@ -3,6 +3,7 @@ import cors from 'cors';
 import routes from './routes/v1/index.js';
 import { errorHandler, errorConverter } from './config/middlewares/error.js';
 import ClientError from './config/error/ClientError.js';
+import cookieParser from 'cookie-parser'
 
 
 // Creates an instance of Express
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 // enable cors
 app.use(cors());
 app.options("*", cors());
+app.use(cookieParser())
 
 // v1 api routes
 app.use("/v1", routes);

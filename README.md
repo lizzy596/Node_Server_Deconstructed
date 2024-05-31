@@ -173,7 +173,24 @@ Bearer tokens like JWTs encode information about the caller so that you can make
 Finally, using JWTs makes it much easier to delegate authentication to an external identify provider written by people who know much more about authentication and security than you or I do.
 
 
+A cookie is simply a short text string that is sent back and forth between the client and the server. You could store name=bob; password=asdfas in a cookie and send that back and forth to identify the client on the server side. You could think of this as carrying on an exchange with a bank teller who has no short term memory, and needs you to identify yourself for each and every transaction. Of course using a cookie to store this kind information is horrible insecure. Cookies are also limited in size.
+Now, when the bank teller knows about his/her memory problem, He/She can write down your information on a piece of paper and assign you a short id number. Then, instead of giving your account number and driver's license for each transaction, you can just say "I'm client 12"
+Translating that to Web Servers: The server will store the pertinent information in the session object, and create a session ID which it will send back to the client in a cookie. When the client sends back the cookie, the server can simply look up the session object using the ID. So, if you delete the cookie, the session will be lost.
+One other alternative is for the server to use URL rewriting to exchange the session id.
+Suppose you had a link - www.myserver.com/myApp.jsp You could go through the page and rewrite every URL as www.myserver.com/myApp.jsp?sessionID=asdf or even www.myserver.com/asdf/myApp.jsp and exchange the identifier that way. This technique is handled by the web application container and is usually turned on by setting the configuration to use cookieless sessions.
 
+
+
+
+
+7:59
+Sessions are server-side files that contain user information, while Cookies are client-side files that contain user information. Sessions have a unique identifier that maps them to specific users. This identifier can be passed in the URL or saved into a session cookie.
+Most modern sites use the second approach, saving the identifier in a Cookie instead of passing it in a URL (which poses a security risk). You are probably using this approach without knowing it, and by deleting the cookies you effectively erase their matching sessions as you remove the unique session identifier contained in the cookies.
+8:00
+Cookies and session both store information about the user (to make the HTTP request stateful) but the difference is that cookies store information on the client-side (browser) and sessions store information on the server-side. A cookie is limited in the sense that it stores information about limited users and only stores limited content for each user. A session is not limit in such a way.
+8:01
+Cookie is basically a global array accessed across web browsers. Many a times used to send/receive values. it acts as a storage mechanism to access values between forms. Cookies can be disabled by the browser which adds a constraint to their use in comparison to session.
+Session can be defined as something between logging in and logging out. the time between the user logging in and logging out is a session. Session stores values only for the session time i.e before logging out. Sessions are used to track the activities of the user, once he logs on.
 
 
 

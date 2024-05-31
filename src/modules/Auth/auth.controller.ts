@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
-//import * as authService from './auth.service.js';
 import catchAsync from '../../config/utils/catchAsync.js';
 // import ClientError from '../../config/error/ClientError.js';
 // import pick from '../../config/utils/pick.js';
@@ -15,6 +14,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
 const login = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await authService.login(email, password);
+  res.cookie("userId", user.id, { maxAge: 90000000 });
   res.send({ user });
 });
 
