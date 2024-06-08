@@ -2,9 +2,12 @@ import { boolean, object, enums, optional, string} from 'superstruct';
 import { MongoId } from "../../config/validators/custom.validators.js";
 
 export const createTask = object({
-  priority: optional(enums(["HIGH", "LOW", "MEDIUM"])),
-  note: string(),
-  reminder: optional(boolean()),
+  body: object(
+    { 
+      note: string(), 
+      user: MongoId
+    }),
+ 
 });
 
 export const getTask = object({

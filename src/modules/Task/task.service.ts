@@ -1,5 +1,6 @@
+import { Document } from 'mongoose';
 import Task, { ITask} from "./task.model.js";
-import {IOptions, QueryResult} from "config/db/plugins/paginate.plugin.js";
+//import {IOptions, QueryResult} from "config/db/plugins/paginate.plugin.js";
 
 
 
@@ -7,11 +8,17 @@ export const createTask = async (taskBody: any): Promise<ITask> => {
   return Task.create(taskBody);
 };
 
-export const queryTasks = async (filter: Record<string, any>, options: IOptions, search: string): Promise<QueryResult> => {
-  //@ts-ignore
-  const Tasks = await Task.paginate(filter, options, search);
-  return Tasks;
-};
+// export const queryTasks = async (filter: Record<string, any>, options: IOptions, search: string): Promise<QueryResult> => {
+//   //@ts-ignore
+//   const Tasks = await Task.paginate(filter, options, search);
+//   return await Task.find({});
+
+// };
+
+export const queryTasks = async (user: string): Promise<Document[]> => {
+  const tasks = await Task.find({user      });
+  return tasks;
+}; 
 
 export const getTaskById = async (id: string): Promise<ITask | null> => {
   return Task.findById(id);

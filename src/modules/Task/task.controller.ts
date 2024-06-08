@@ -3,7 +3,9 @@ import httpStatus from 'http-status';
 import * as taskService from './task.service.js';
 import catchAsync from '../../config/utils/catchAsync.js';
 import ClientError from '../../config/error/ClientError.js';
-import pick from '../../config/utils/pick.js';
+//import pick from '../../config/utils/pick.js';
+
+
 
 const getTask = catchAsync(async (req: Request, res: Response) => {
   const task = await taskService.getTaskById(req.params.taskId!);
@@ -19,12 +21,12 @@ const createTask = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getTasks = catchAsync(async (req: Request, res: Response) => {
-  const filter = pick(req.query, ["name", "role"]);
-  const options = pick(req.query, ["sortBy", "limit", "page"]);
-  const { search } = pick(req.query, ["search"]);
-  const result = await taskService.queryTasks(filter, options, search);
+      // @ts-ignore 
+  const result = await taskService.queryTasks(req.session.userId);
   res.send(result);
 });
+
+
 
 const updateTask = catchAsync(async (req: Request, res: Response) => {
   const task = await taskService.updateTaskById(req.params.taskId!, req.body);
@@ -45,3 +47,12 @@ export {
 };
 
 
+// const queryTasks = catchAsync(async (req: Request, res: Response) => {
+//   console.log('Cookies:sgfdgsgdf ', req.cookies)
+//   // const filter = pick(req.query, ["name", "role"]);
+//   // const options = pick(req.query, ["sortBy", "limit", "page"]);
+//   // const { search } = pick(req.query, ["search"]);
+//   // const result = await taskService.queryTasks(filter, options, search);
+//   const result = 'apple'
+//   res.send(result);
+// });

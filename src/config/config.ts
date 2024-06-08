@@ -24,6 +24,10 @@ const config = {
     url: value.MONGODB_URL + (value.NODE_ENV === 'test' ? '-test' : ''),
     options: {}
   },
+  cors: {
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    credentials: true,
+  },
  };
 
 export default config;

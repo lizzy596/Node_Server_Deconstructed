@@ -1,4 +1,4 @@
-import mongoose, {Schema, Model, Document} from "mongoose";
+import mongoose, {Schema, Model, Document, ObjectId} from "mongoose";
 import toJSON from "../../config/db/plugins/toJSON.plugin.js";
 import paginate from "../../config/db/plugins/paginate.plugin.js";
 
@@ -7,8 +7,8 @@ export interface Paginator {
 }
 
 export interface ITask extends Document, Paginator {
-  priority: string;
   note: string;
+  user: ObjectId,
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,16 +22,14 @@ export interface TaskModel extends Model<ITask, {}> {
 
 const schema = new Schema<ITask, TaskModel>(
   {
-    priority: {
-      type: String,
-      enum: ["HIGH", "MEDIUM", "LOW"],
-      default: "LOW",
-    },
     note: {
       type: String,
       required: true,
     },
-
+    user: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'User',
+    },
     createdAt: {
       type: Date,
       default: Date.now
@@ -61,6 +59,7 @@ const schema = new Schema<ITask, TaskModel>(
 
 // add plugin that converts mongoose to json
 schema.plugin(toJSON);
+//@ts-ignore
 schema.plugin(paginate);
 
 // taskSchema.pre('save', function(next) {
@@ -73,7 +72,7 @@ schema.plugin(paginate);
 // });
 
 schema.statics.searchableFields = function () {
- return ['priority', 'note'];
+ return ['note'];
 };
 
 schema.statics.paginate = paginate;

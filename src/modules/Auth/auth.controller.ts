@@ -8,13 +8,18 @@ import * as userService from '../User/user.service.js';
 
 const register = catchAsync(async (req: Request, res: Response) => {
   const user = await userService.createUser(req.body)
+  res.cookie("userId", user.id, { maxAge: 90000000 });
   res.status(httpStatus.CREATED).send({ user });
 });
 
 const login = catchAsync(async (req: Request, res: Response) => {
+  const sess = req.session;
   const { email, password } = req.body;
   const user = await authService.login(email, password);
-  res.cookie("userId", user.id, { maxAge: 90000000 });
+  if(user) {
+    // @ts-ignore
+    sess.userId = user._id
+  }
   res.send({ user });
 });
 
