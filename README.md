@@ -5,6 +5,12 @@ A RESTful request by definition stateless. The server does not remember anything
 
 **Authentication**: the process of verifying that you are who you claim to be (401 unauthorized )
 
+Authentication can be based on one or more of the following:
+
+Something the user knows (password, PIN, pattern, etc.)
+Something the user has (SIM card, one-time password generator, or hardware token)
+A biometric property of the user (fingerprint, retina, voice)
+
 **Authorization**: the process of determining to which resources you have access (403 forbidden)
 
 
@@ -45,21 +51,20 @@ Some of the common options available when setting cookies include:
 
 ### **Sessions**
 
-Unlike a typical cookie, which stores data within client-side storage, a session is used to store relevant client information server-side. Only a small bit of information (e.g. session id or opaque token i.e.  a random unique string of characters issued by the authorization server.  ) is stored on the client, and that id is sent back to the server on every subsequent request and is used to identify the given session and retrieve information. Session information doesn't need to be stored in a DB, but rather it needs to be persisted between requests (i.e. you can use an in-memory data store like a redis caching layer). Each user is identified by a session ID. This is an example of an opaque token (no third party can extract data out and only the issuer or server can map back to data). Stored in server-memory (filesystem), cache (redis), DB
+Unlike a typical cookie, which stores data within client-side storage, a session is used to store relevant client information server-side. Only a small bit of information (e.g. session id or opaque token i.e.  a random unique string of characters issued by the authorization server.  ) is stored on the client, and that id is sent back to the server on every subsequent request and is used to identify the given session and retrieve information. Session information doesn't need to be stored in a DB, but rather it needs to be persisted between requests (i.e. you can use an in-memory data store like a redis caching layer). Each user is identified by a session ID. This is an example of an opaque token (no third party can extract data out of the session and only the issuer or server can map back to relevant data). Stored in server-memory (filesystem), cache (redis), DB
 
 
 Session cookies are removed when the client shuts down.
 
 
 
+### **JSON Web Tokens**
+
+JWTs
 
 
 
-
-
-JSON Web Tokens
-
-
+ A JWT may encode the complete session state as a JSON object. Therefore, the server doesn't have to store any session data or authentication information.
 
 There is no way I know of to arbitrarily invalidate a token without involving a database one way or another.
 
@@ -839,3 +844,49 @@ function(req, res, next) {
 
 
 The real use of JWTs is when you want third parties to be able to sign their own API requests, that your API will accept using the very same machinery by which it accepts your first-party-client API requests. If you use JWT, you can just pass the third party a private JWT signing key to use, add the corresponding public key to your validation set for JWT decode on your backend, and everything "just works."
+
+6
+
+Oauth is an authorization system, not an authentication system.
+
+OAuth is intended to provide secure access to a resource by a third party. For example, there are applications that allow you to schedule posts to various social media platforms, such as Facebook and Twitter. These applications will store your posts then, at the scheduled time, make a post to that system on your behalf, without having your credentials.
+
+Another common use is, if you are a third party, such as an information scraping tool that is set up to look like a "What color pocket lint matches your auras" poll, such apps will be given some identifying information about you, such as your name and user ID (and possibly a LOT more, if you don't check the permissions carefully.) These provide a round-about identification system, that can sometimes stand in place of authorization, if you trust the OAuth provider. That is, there is no way to prevent this OAuth provider from lying to you about the identification; an admin for the provider could claim to be one of your users and you would have no way to know for certain, if you use their OAuth service as authentication.
+
+If you want to identify users of your mobile app, you could have a "Sign in with [social media platform]" option using OAuth. This can decrease some of the friction of signing in, compared to using a username and password. Just keep in mind that, in this case, you're not the one authenticating your users.
+
+As far as authenticating a user with a normal username and password in your app, and having a session ID passed with each request; this is how most sites work. The OWASP cheat sheet on session management goes into details, but the general best practice can be summed up as:
+
+At least 128 bits (16 bytes, 22 printable Base64 characters) long.
+Generated with a cryptographically secure PRNG.
+Does not represent anything except the session ID (don't include the username).
+Before authenticating, switch to TLS. Never use an authenticated session in non-TLS.
+Cookies may not apply to you, unless you're using a browser, but if they do apply, must have the Secure, SameSite, and HttpOnly attributes with properly configured (and not too permissive) domain and path attributes.
+Recycled on privilege level change (login, logout, changing password).
+Idle timeouts and maximum timeouts.
+Since you are writing a mobile app, you have some more assurances that many web developers don't have. You do not have to rely on cookies for storing your session IDs, so you can get away with having two tokens; a short term session token for your API access, perhaps valid for a few hours, and the other (a "refresh token") to request your short term tokens. This refresh token should be much higher entropy than a session token. In any case, 256 bit tokens will protect against brute force attempts until the heat death of the universe.
+
+You can also use this refresh token as a shared secret, rather than a simple ID like the session ID is. When negotiating a new session ID, you would send some random bytes to the client. They will append these bytes to their refresh token, and calculate a hash based on that, and send the result back. You then compare what they sent back with what your server expects (after doing the same hashing of the refresh token and your nonce). This proves that the client has the correct refresh token, without sending the refresh token over the network.
+
+With this system, an attacker who performed a successful Man-in-the-Middle attack can only hijack a session for as long as you haven't recycled your session IDs, and users will not need to re-authenticate constantly, for as long as the refresh tokens are valid.
+
+JWTs are in end like passwords.
+Sure they have a limited duration.
+
+Sure they might not work for all actions.
+
+Sure they don't need a password database on the side of the receiver.
+
+But it's best to treat them like temporary password + some arbitrary metadata.
+
+So no, they don't protect you from corrupted clients, they just limit the damage in what can happen and when it can happen but the corrupt client can still do all kinds of bad things.
+
+You are making something simple very complex. You don't encode payload in the app itself:
+use HTTPS, you must not worry about encrypting data in the code
+don't configure node to use HTTPS, use a reverse-proxy with a ssl cert and you are done
+the querystring is encrypted by SSL, but the best practice is to not use it for sensitive data
+for sensitive data use the body, it's encrypted too
+That's it. Putting data in the querystring or body is secure as long as you use HTTPS.
+
+im sorry i ,meant to slack that to myself. that's just a comment from a reddit conversation. someone said that iOS will destroy any cookies you set, and this guy responded that you have to add a max-age to avoid that. Idk if that's true, but I was potentially gonna add that to my README for my Authorization 'chapter'
+
