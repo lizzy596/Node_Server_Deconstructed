@@ -888,5 +888,26 @@ the querystring is encrypted by SSL, but the best practice is to not use it for 
 for sensitive data use the body, it's encrypted too
 That's it. Putting data in the querystring or body is secure as long as you use HTTPS.
 
-im sorry i ,meant to slack that to myself. that's just a comment from a reddit conversation. someone said that iOS will destroy any cookies you set, and this guy responded that you have to add a max-age to avoid that. Idk if that's true, but I was potentially gonna add that to my README for my Authorization 'chapter'
+JWTs are base64 encoded.
+
+A JWT has 3 parts:
+
+a base64 url encoded json header
+
+a base64 url encoded json body
+
+a base64 url encoded signature
+
+A signed JWT can easily be converted back to plain text without a key. The signature only provides a way to verify that the token was issued by someone who knows the password. Using it the way you suggest only provides integrity protection and does not enhance privacy.
+
+
+I was having this issue, I added max-age and my cookies last for as long as I need them to.
+
+
+
+
+
+
+
+
 
