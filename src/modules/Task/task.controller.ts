@@ -22,7 +22,8 @@ const createTask = catchAsync(async (req: Request, res: Response) => {
 
 const getTasks = catchAsync(async (req: Request, res: Response) => {
       // @ts-ignore 
-  const result = await taskService.queryTasks(req.session.userId);
+  const result = await taskService.queryTasks(req.session.user);
+  console.log(result);
   res.send(result);
 });
 

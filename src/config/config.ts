@@ -1,4 +1,4 @@
-import { enums, defaulted, validate, object, string} from 'superstruct';
+import { enums, defaulted, validate, object, string } from 'superstruct';
 import path from 'path';
 import dotenv from 'dotenv';
 
@@ -9,6 +9,9 @@ const envVarsSchema = object({
     NODE_ENV: enums(['production', 'development', 'test']),
     PORT: defaulted(string(), '3010'),
     MONGODB_URL: string(),
+    JWT_SECRET: string(),
+    JWT_ACCESS_EXPIRATION_MINUTES: string(),
+    JWT_REFRESH_EXPIRATION_DAYS: string(),
   });
 
 const [error, value] = validate(envVars.parsed, envVarsSchema);
@@ -20,6 +23,11 @@ if (error) {
 const config = {
   env: value.NODE_ENV,
   port: value.PORT,
+  jwt: {
+    secret: value.JWT_SECRET,
+    accessTokenExpiration: value.JWT_ACCESS_EXPIRATION_MINUTES,
+    refreshTokenExpiration: value.JWT_REFRESH_EXPIRATION_DAYS
+  },
   mongoose: {
     url: value.MONGODB_URL + (value.NODE_ENV === 'test' ? '-test' : ''),
     options: {}

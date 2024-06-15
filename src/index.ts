@@ -1,10 +1,18 @@
-
 import config from './config/config.js';
 import app from './app.js';
 import mongoose from 'mongoose';
 
 
+
+
 let server: any;
+
+
+
+
+
+
+
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
 console.log('connected to mongoDB')
   server = app.listen(config.port, () => {

@@ -19,8 +19,6 @@ export const logout = async (id: string) => {
  console.log('hey')
 };
 
-// export const logout = async (id: string): Promise<IUser | null> => {
-//   // return User.findById(id);
-// };
+
 
 
