@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import pick from '../utils/pick.js';
+import pick from '../utils/pick.util.js';
 const{ validate, StructError } = require('superstruct');
 import ClientError from '../error/ClientError.js';
 
