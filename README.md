@@ -72,12 +72,12 @@ integrity of the token via its digital signature. In other words you can know wh
  
 
 
-Token Based Authentication Workflow:
+**Token Based Authentication Workflow:**
 
-1. When a user successfully registers/logs in a short-lived access token and longer-lived refresh token are generated and returned in the response. 
-2. The access token is stored in memory on both web and mobile apps and the refresh token is stored in secure storage on the device for mobile apps and in an http-only cookie on web apps (but what about cookie that will stored on mobile apps?). 
-3. When the user attempts to access to a protected route, the access token accompanies the request in the request headers as a bearer token. 
-4. The request then hits the auth middleware where it is verified against the server held secret, if the token  was indeed issued by the server the token payload is decoded and if a valid user is found in the database, that user id is added to the request object for use during the request life cycle. 
+1. Upon a successful registration or login two jwt tokens are generated, a short-lived access token and longer-lived refresh token, they are then returned in the response. 
+2. The access token is stored in memory on both web and mobile apps and the refresh token is stored in secure storage on the device for mobile apps and in an http-only cookie on web apps (but what about cookie that will stored on mobile apps?--even though cookies can be set on mobile devices, ios tends to destory cookies before the time the developer sets (this is potentially resolved by setting a maxAge on the cookie)). 
+3. When the user attempts to access to a protected route, the access token accompanies the request in the request headers as a bearer token.
+4. The request then hits the auth middleware where the jwt is extracted from the header, its verified against the server held secret to determine if the token  was indeed issued by the server and is still valid the token payload is decoded and if a valid user is found in the database with appropriate permissions to access a given resource, that user id is added to the request object for use during the request life cycle. 
 5.When the access token expires a timer expires on the client side, triggering a 
 When user logs out:
 
@@ -1185,3 +1185,6 @@ It may not be required to send the expired access token alongside a refresh toke
 Refresh tokens let the user get a new access token. In a naive implementation (without rotation) I could use one refresh token and get as many access tokens as I want from it until it expires. That’s good but also bad. Which is where rotation comes into play. Each time a refresh token is submitted you issue a new one guaranteeing that any token is good only once. This means any compromised access token/refresh token combination is only valid until they both expire or the refresh token is used. If a token is replayed you can act on the potential that a user has had their session compromised.
 It’s all just minor changes that help add incremental bits of secure layers. Since you can’t be perfectly secure you just need to make it more difficult to break.
 Issuing a new refresh token on each use and invalidate all credentials / log out the user when detecting refresh token reuse (what else could you do?) is a good idea, the latter is even in the standard.
+
+
+A Unix timestamp specifies the number of seconds. A JSON Web Token uses the number of seconds. JavaScript Date uses the number of milliseconds.

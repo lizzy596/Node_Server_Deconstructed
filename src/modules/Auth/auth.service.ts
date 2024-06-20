@@ -14,6 +14,10 @@ export const login = async (email: string, password: string): Promise<IUser> => 
   return user;
 };
 
+export const refreshAuthTokens = async () => {
+  console.log('hey')
+}
+
 export const logout = async (id: string) => {
   console.log(id)
  console.log('hey')

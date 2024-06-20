@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyJwt } from '../utils/jwt.util';
+import { verifyJWT } from '../../modules/Auth/utils/jwt.util';
 import ClientError from '../error/ClientError';
 import * as userService from '../../modules/User/user.service';
 
@@ -21,7 +21,7 @@ export const auth = async (req: Request, _res: Response, next: NextFunction): Pr
   }
 
   try {
-    const decoded = verifyJwt(tokenString);
+    const decoded = await verifyJWT(tokenString);
     const { sub } = decoded;
 
     if (!sub) {

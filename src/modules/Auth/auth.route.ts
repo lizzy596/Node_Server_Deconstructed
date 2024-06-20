@@ -11,6 +11,9 @@ router
 router
   .route("/login")
   .post(validateInput(authValidation.login), authController.login);
+  router
+  .route("/refresh-tokens")
+  .post(authController.refreshAuthTokens)
 router
   .route("/logout/:userId")
   .post(validateInput(authValidation.login), authController.login)

@@ -2,12 +2,14 @@ import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import catchAsync from '../../config/utils/catchAsync.util.js';
 import ClientError from '../../config/error/ClientError.js';
-import { setCookieExpiration } from '../../config/utils/cookie.util.js';
+import { setCookieToken } from './utils/cookie.util.js';
+import { verifyJWT } from './utils/jwt.util.js';
 // import pick from '../../config/utils/pick.js';
 import * as authService from './auth.service.js'
 import * as userService from '../User/user.service.js';
-import { generateJWT } from '../../config/utils/jwt.util.js';
-import config from '../../config/config.js'
+import * as sessionService from './Session/session.service.js';
+import { generateAuthTokens } from './utils/jwt.util.js';
+
 
 const register = catchAsync(async (req: Request, res: Response) => {
   const user = await userService.createUser(req.body)
@@ -21,16 +23,21 @@ const login = catchAsync(async (req: Request, res: Response) => {
   if(!user) { 
     throw ClientError.Unauthorized("Invalid credentials");
   }
-  const accessToken = generateJWT({sub: user._id, tokenType: 'access'}, config.jwt.accessTokenExpiration);
-  const refreshToken = generateJWT({sub: user._id, tokenType: 'refresh'}, config.jwt.refreshTokenExpiration);
-  const tokens = { accessToken: accessToken, refreshToken: refreshToken}
-const uni = setCookieExpiration(refreshToken);
-const milli = uni * 1000;
-const dateObj = new Date(milli);
-console.log('human date', dateObj)
-res.cookie("refreshToken", refreshToken, {secure: true, httpOnly: false, maxAge: milli, expires: dateObj});
+  const tokens = await generateAuthTokens(user._id)
+  await setCookieToken(res, tokens.refreshToken)
   res.send({ user, tokens });
   });
+
+const refreshAuthTokens = catchAsync(async (req: Request, res: Response) => {
+const payload = await verifyJWT(req.cookies.refreshToken)
+if(payload.sub && typeof payload.sub === 'string') {
+await sessionService.deleteSessionRecordsByUserId(payload.sub);
+const user = userService.getUserById(payload.sub);
+const tokens = await generateAuthTokens(payload.sub);
+setCookieToken(res, tokens.refreshToken); 
+res.send({ user, tokens });
+} 
+});
 
 const logout = catchAsync(async (req: Request, res: Response) => {
   //@ts-ignore
@@ -44,5 +51,6 @@ const logout = catchAsync(async (req: Request, res: Response) => {
 export {
   register,
   login,
+  refreshAuthTokens,
   logout
 };
