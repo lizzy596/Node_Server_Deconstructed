@@ -162,9 +162,9 @@ you can run in parallel is equal to the amount of cpu cores you have.
 
 Every time we type a url into the browser we are sending a request to the server that has those resources.
 
-Request Message - Has a method, headers and an optional body, URl
+**Request Message** -> Has a method, headers and an optional body, URl
 
-Response Message -> Status Code, Status Text, Headers, and an Optional Body
+**Response Message** -> Status Code, Status Text, Headers, and an Optional Body
 
 content-type: text/html or application/json
 
@@ -178,7 +178,7 @@ content-type: text/html or application/json
 
     The internet is fundamentally about passing packets back and forth.
 
-    5 layers to a packet
+    **5 layers to a packet**
     Physical- cables
     Link- wifi/ethernet
     Network- IP
@@ -190,12 +190,13 @@ content-type: text/html or application/json
 
 
 UDP- FAST, UNRELIABLE lightweight, 8 bytes for a header, connectionless, consistency, will send data no matter what, doesnt care about packet loss or order, big win is that it is very fast.
-TCP- RELIABLE connection-based, you must go through a three-way handshake, 1. client says id like to connect 2. server says yes or no 3. data starts streaming, very reliable. Delivery acknowledgements,
-lets client know the data was received, retransmission of data is possible, packets in order
+TCP- RELIABLE connection-based, you must go through a three-way handshake, 1. client says id like to connect 2. server says yes or no 3. data starts streaming, very reliable. 
+Delivery acknowledgements let client know the data was received, retransmission of data is possible, packets in order
 
 
-Initally http just made to pass around html, now it can pass many types of digital files. First webpage ever: http://info.cern.ch/. HTT is only connected when required. It can disconnect and re-establish the connection to send a response. It is stateless-there is no dialogue. Once the connection is closed to two machines forget each other.  As soon as the 
-request hits the server the http connection is terminated. The TCP connection is still open. The http connection will reopen to send the response.
+Initally http was just made to pass around html, now it can pass many types of digital files. First webpage ever: http://info.cern.ch/. HTTP is only connected when required. 
+It can disconnect and re-establish the connection to send a response. It is stateless-there is no dialogue. Once the connection is closed to two machines forget each other.  
+As soon as the request hits the server the http connection is terminated. The TCP connection is still open. The http connection will reopen to send the response.
 
 HTTP Mesage:
 
@@ -213,10 +214,10 @@ To-Do: Add example using worker threads in node
 
 **Miscellaneous** 
 
-Node.js behavior for uncaught exceptions is to print current stack trace and then terminate the thread. However, Node.js allows customization of this behavior. It provides a global object named process that is available to all Node.js applications. It is an EventEmitter object and in case of an uncaught exception, uncaughtException event is emitted and it is brought up to the main event loop. In order to provide a custom behavior for uncaught exceptions, you can bind to this event. However, resuming the application after such an uncaught exception can lead to further problems. Therefore, if you do not want to miss any uncaught exception, you should bind to uncaughtException event and cleanup any allocated resources like file descriptors, handles and similar before shutting down the process. Resuming the application is strongly discouraged as the application will be in an unknown state. It is important to note that when displaying error messages to the user in case of an uncaught exception, detailed information like stack traces should not be revealed to the user. Instead, custom error messages should be shown to the users in order not to cause any information leakage.
+Node.js behavior for uncaught exceptions is to print current stack trace and then terminate the thread. However, Node.js allows customization of this behavior. It provides a global object named process that is available to all Node.js applications. It is an EventEmitter object and in the case of an uncaught exception, the uncaughtException event is emitted and it is brought up to the main event loop. In order to provide a custom behavior for uncaught exceptions, you can bind to this event. However, resuming the application after such an uncaught exception can lead to further problems. Therefore, if you do not want to miss any uncaught exception, you should bind to uncaughtException event and cleanup any allocated resources like file descriptors, handles and similar before shutting down the process. Resuming the application is strongly discouraged as the application will be in an unknown state. It is important to note that when displaying error messages to the user in case of an uncaught exception, detailed information like stack traces should not be revealed to the user. Instead, custom error messages should be shown to the users in order not to cause any information leakage.
 
 When using EventEmitter, errors can occur anywhere in the event chain. Normally, if an error occurs in an EventEmitter object, an error event that has an Error object as an argument is called. However, if there are no attached listeners to that error event, the Error object that is sent as an argument is thrown and becomes an uncaught exception. In short, if you do not handle errors within an EventEmitter object properly, these unhandled errors may crash your application. Therefore, you should always listen to error events when using EventEmitter objects.
 
-Errors that occur within asynchronous callbacks are easy to miss. Therefore, as a general principle first argument to the asynchronous calls should be an Error object. Also, express routes handle errors itself, but it should be always remembered that errors occurred in asynchronous calls made within express routes are not handled, unless an Error object is sent as a first argument.
+Errors that occur within asynchronous callbacks are easy to miss. Therefore, as a general principle the first argument to the asynchronous calls should be an Error object. Also, Express routes handle errors themselves, but it should be always remembered that errors occurring in asynchronous calls made within express routes are **not** handled, unless an Error object is sent as a first argument.
 
 Errors in these callbacks can be propagated as many times as possible. Each callback that the error has been propagated to can ignore, handle or propagate the error.
