@@ -3,7 +3,7 @@ import { Response } from 'express';
 
 interface tokenData {
   token: string, 
-  expiration: {expDate: Date, expSeconds: number}
+  expiration: {expDate: string, expSeconds: number}
 }
 
 export const setCookieToken = async (res: Response, tokenData: tokenData) => {

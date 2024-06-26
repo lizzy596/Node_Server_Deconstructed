@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import config from '../../../config/config';
+import dayjs from "dayjs";
 import * as sessionService from '../Session/session.service.js'
+
 
 
 interface jsonPayload {
@@ -11,8 +13,8 @@ interface jsonPayload {
 }
 
 interface authTokens {
-  accessToken: { token: string; expiration: {expDate: Date, expSeconds: number}},
-   refreshToken: { token: string; expiration: {expDate: Date, expSeconds: number} }
+  accessToken: { token: string; expiration: {expDate: string, expSeconds: number}},
+   refreshToken: { token: string; expiration: {expDate: string, expSeconds: number} }
 }
 
 
@@ -27,10 +29,9 @@ return jwt.verify(token, config.jwt.secret);
 
  export const generateAuthTokens = async (userId: string): Promise<authTokens> => {
   const accessToken = generateJWT({ sub: userId, tokenType: 'access' }, config.jwt.accessTokenExpiration);
-  const access = calculateExpiration(3, 'm');
+  const access = calculateExpiration(config.jwt.accessTokenExpiration);
   const refreshToken = generateJWT({ sub: userId, tokenType: 'refresh' }, config.jwt.refreshTokenExpiration);
-  const refresh = calculateExpiration(30, 'd');
-
+  const refresh = calculateExpiration(config.jwt.refreshTokenExpiration);
   await sessionService.createSessionRecord({ user: userId, tokenType: 'refresh' });
    return {
     accessToken: { token: accessToken, expiration: access},
@@ -38,15 +39,16 @@ return jwt.verify(token, config.jwt.secret);
   };
 };
 
-
-function calculateExpiration(num:number, unit: string) {
-  const multiplier = unit === 'm' ? 60: 86400;
-  const now = new Date();
-  const expiryDate= new Date(now.getTime() + num * multiplier * 1000);
-  const expirySeconds = Math.floor(expiryDate.getTime() / 1000);
-  return {expDate: expiryDate, expSeconds: expirySeconds}
+function calculateExpiration(expires:string) {
+  const unit = expires.slice(-1);
+  const num = parseInt(expires.match(/\d+/)![0], 10);
+  const dateUnit = unit === 'm' ? 'minute' : 'day';
+  const expiry = dayjs().add(num, dateUnit);
+  return {
+    expDate: expiry.format(),
+    expSeconds: expiry.unix()
+  };
 }
-
 
 
 

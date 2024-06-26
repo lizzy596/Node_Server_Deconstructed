@@ -30,6 +30,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
 
 const refreshAuthTokens = catchAsync(async (req: Request, res: Response) => {
 const payload = await verifyJWT(req.cookies.refreshToken)
+console.log('payload', payload)
 if(payload.sub && typeof payload.sub === 'string') {
 await sessionService.deleteSessionRecordsByUserId(payload.sub);
 const user = userService.getUserById(payload.sub);
