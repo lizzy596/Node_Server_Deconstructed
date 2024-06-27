@@ -29,11 +29,10 @@ const login = catchAsync(async (req: Request, res: Response) => {
   });
 
 const refreshAuthTokens = catchAsync(async (req: Request, res: Response) => {
-const payload = await verifyJWT(req.cookies.refreshToken)
-console.log('payload', payload)
+const payload = await verifyJWT(req.cookies.refreshToken);
 if(payload.sub && typeof payload.sub === 'string') {
 await sessionService.deleteSessionRecordsByUserId(payload.sub);
-const user = userService.getUserById(payload.sub);
+const user = await userService.getUserById(payload.sub);
 const tokens = await generateAuthTokens(payload.sub);
 setCookieToken(res, tokens.refreshToken); 
 res.send({ user, tokens });
@@ -47,11 +46,16 @@ const logout = catchAsync(async (req: Request, res: Response) => {
 
 });
 
+const revokeAuthSession = catchAsync(async (req: Request, res: Response) => {
+
+})
+
 
 
 export {
   register,
   login,
   refreshAuthTokens,
-  logout
+  logout,
+  revokeAuthSession
 };
