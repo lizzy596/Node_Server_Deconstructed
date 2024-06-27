@@ -1,17 +1,31 @@
-# **Chapter 4 Authentication and Authorization**
-
-A RESTful request by definition stateless. The server does not remember anything about the requester between requests. In practice there are many occasions where information about the requester needs to be persisted between requests and much debate and opinion exists regarding implementing this statefulness securely and effectively.
+# **Chapter 4 - Authentication and Authorization**
 
 
-**Authentication**: the process of verifying that someone/something is what it claims to be (401 unauthorized )
+## **Objectives**
 
+* **Implement Authentication using both sessions and tokens** 
+
+* **Create a complementary web and mobile client**
+
+* **Implement the ability to revoke/blacklist a bad session or token**
+
+* **Implement roles-based permissions and implement a route on the client that requires elevated privileges to access**
+
+
+### **Introduction**
+
+<span style="font-size:1.2em;">A RESTful request by definition stateless. The server does not remember anything about the requester between requests. In practice there are many occasions where information about the requester needs to be persisted between requests and much debate and opinion exists regarding implementing this statefulness securely and effectively.</span>
+
+
+<span style="font-sze:1.2em;"><ins>**Authentication**:</ins> </span>
+ the process of verifying that some entity is what it claims to be (401 unauthorized)
 Authentication can be based on one or more of the following:
 
-Something the user knows (password, PIN, pattern, etc.)
-Something the user has (SIM card, one-time password generator, or hardware token)
-A biometric property of the user (fingerprint, retina, voice)
+* Something the user knows (password, PIN, pattern, etc.)
+* Something the user has (SIM card, one-time password generator, or hardware token)
+* A biometric property of the user (fingerprint, retina, voice)
 
-**Authorization**: the process of determining to which resources you have access (403 forbidden)
+<span style="font-sze:1.2em;"><ins>**Authorization**:</ins> the process of determining to which resources you have access (403 forbidden)</span>
 
 
 ## **Password Security Considerations**
@@ -1188,3 +1202,5 @@ Issuing a new refresh token on each use and invalidate all credentials / log out
 
 
 A Unix timestamp specifies the number of seconds. A JSON Web Token uses the number of seconds. JavaScript Date uses the number of milliseconds.
+
+Any cookie that does not have an expiration set is considered a session cookie by the browser and deleted when the browser quits. As a result, even though the old session file may remain on the server, it is no longer accessible once the associated cookie is no longer being sent back by the browser.

@@ -1,14 +1,16 @@
-import mongoose, {Schema, Model} from "mongoose";
+import mongoose, {Schema, Model } from "mongoose";
 import toJSON from "../../../config/db/plugins/toJSON.plugin.js";
 import paginate from "../../../config/db/plugins/paginate.plugin.js";
+
 
 export interface Paginator {
   paginate(): void
 }
 export interface ISession {
   tokenType: string;
+  token: string;
   valid?: boolean;
-  user: string,
+  user: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -22,6 +24,10 @@ export interface SessionModel extends Model<ISession, {}> {
 
 const schema = new Schema<ISession, SessionModel>(
   {
+    token: {
+      type: String,
+      required: true,
+    },
     tokenType: {
       type: String,
       required: true,

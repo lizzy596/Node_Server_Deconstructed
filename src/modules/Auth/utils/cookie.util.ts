@@ -16,12 +16,12 @@ export const setCookieToken = async (res: Response, tokenData: tokenData) => {
   };
   res.cookie("refreshToken", tokenData.token, cookieOptions);
   }
-  
+
   
 
 
 export const clearCookieToken = (res: Response) => {
-  res.clearCookie('refreshToken');
+  res.clearCookie('refreshCookie');
 }
 
 

@@ -1,13 +1,11 @@
 import { Request, Response } from 'express';
+import config from '../../config/config.js';
 import httpStatus from 'http-status';
 import catchAsync from '../../config/utils/catchAsync.util.js';
 import ClientError from '../../config/error/ClientError.js';
-import { setCookieToken } from './utils/cookie.util.js';
-import { verifyJWT } from './utils/jwt.util.js';
-// import pick from '../../config/utils/pick.js';
 import * as authService from './auth.service.js'
 import * as userService from '../User/user.service.js';
-import * as sessionService from './Session/session.service.js';
+import { setCookieToken, clearCookieToken } from './utils/cookie.util.js';
 import { generateAuthTokens } from './utils/jwt.util.js';
 
 
@@ -29,24 +27,21 @@ const login = catchAsync(async (req: Request, res: Response) => {
   });
 
 const refreshAuthTokens = catchAsync(async (req: Request, res: Response) => {
-const payload = await verifyJWT(req.cookies.refreshToken);
-if(payload.sub && typeof payload.sub === 'string') {
-await sessionService.deleteSessionRecordsByUserId(payload.sub);
-const user = await userService.getUserById(payload.sub);
-const tokens = await generateAuthTokens(payload.sub);
-setCookieToken(res, tokens.refreshToken); 
-res.send({ user, tokens });
-} 
+const refreshed = await authService.refreshAuth(req.cookies.refreshToken);
+setCookieToken(res, refreshed?.tokens?.refreshToken); 
+res.send(refreshed);
 });
 
-const logout = catchAsync(async (req: Request, res: Response) => {
-  //@ts-ignore
-  req.session.destroy();
-  res.send('hey');
-
+const logout = catchAsync(async (req:Request, res:Response) => {
+  const token = await authService.logout(req.cookies[config.jwt.refreshCookieName] || req.body?.refreshToken);
+  if (!token) {
+    throw new ClientError(httpStatus.NOT_FOUND, 'No token found');
+  }
+  clearCookieToken(res);
+  res.status(httpStatus.NO_CONTENT).send();
 });
 
-const revokeAuthSession = catchAsync(async (req: Request, res: Response) => {
+const revokeAuthSession = catchAsync(async (_req: Request, _res: Response) => {
 
 })
 

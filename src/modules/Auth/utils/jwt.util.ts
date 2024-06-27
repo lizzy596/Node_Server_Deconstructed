@@ -12,7 +12,7 @@ interface jsonPayload {
   exp?: number;
 }
 
-interface authTokens {
+export interface IAuthTokens {
   accessToken: { token: string; expiration: {expDate: string, expSeconds: number}},
    refreshToken: { token: string; expiration: {expDate: string, expSeconds: number} }
 }
@@ -27,12 +27,13 @@ export const verifyJWT = async (token:string)  => {
 return jwt.verify(token, config.jwt.secret);
  };
 
- export const generateAuthTokens = async (userId: string): Promise<authTokens> => {
+ export const generateAuthTokens = async (userId: string): Promise<IAuthTokens> => {
+  await sessionService.deleteSessionRecordsByUserId(userId);
   const accessToken = generateJWT({ sub: userId, tokenType: 'access' }, config.jwt.accessTokenExpiration);
   const access = calculateExpiration(config.jwt.accessTokenExpiration);
   const refreshToken = generateJWT({ sub: userId, tokenType: 'refresh' }, config.jwt.refreshTokenExpiration);
   const refresh = calculateExpiration(config.jwt.refreshTokenExpiration);
-  await sessionService.createSessionRecord({ user: userId, tokenType: 'refresh' });
+  await sessionService.createSessionRecord({ user: userId, tokenType: 'refresh', token: refreshToken });
    return {
     accessToken: { token: accessToken, expiration: access},
     refreshToken: { token: refreshToken, expiration: refresh} 

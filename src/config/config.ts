@@ -12,6 +12,7 @@ const envVarsSchema = object({
     JWT_SECRET: string(),
     JWT_ACCESS_EXPIRATION_MINUTES: string(),
     JWT_REFRESH_EXPIRATION_DAYS: string(),
+    JWT_REFRESH_COOKIE: string(),
   });
 
 const [error, value] = validate(envVars.parsed, envVarsSchema);
@@ -26,7 +27,8 @@ const config = {
   jwt: {
     secret: value.JWT_SECRET,
     accessTokenExpiration: value.JWT_ACCESS_EXPIRATION_MINUTES,
-    refreshTokenExpiration: value.JWT_REFRESH_EXPIRATION_DAYS
+    refreshTokenExpiration: value.JWT_REFRESH_EXPIRATION_DAYS,
+    refreshCookieName: value.JWT_REFRESH_COOKIE
   },
   mongoose: {
     url: value.MONGODB_URL + (value.NODE_ENV === 'test' ? '-test' : ''),

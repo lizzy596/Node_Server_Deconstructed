@@ -15,8 +15,8 @@ router
   .route("/refresh-tokens")
   .post(authController.refreshAuthTokens)
 router
-  .route("/logout/:userId")
-  .post(validateInput(authValidation.login), authController.login)
+  .route("/logout")
+  .post(validateInput(authValidation.logout), authController.logout)
  
 
 export default router;
