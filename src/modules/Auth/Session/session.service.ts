@@ -1,4 +1,3 @@
-//import { Document } from 'mongoose';
 import Session, { ISession} from "./session.model.js";
 
 

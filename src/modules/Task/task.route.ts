@@ -10,7 +10,7 @@ const router = express.Router();
 router
   .route("/")
   .post(validateInput(taskValidation.createTask), taskController.createTask)
-  .get(auth, taskController.getTasks);
+  .get(auth('getTasks'), taskController.getTasks);
 
 router
   .route("/:taskId")

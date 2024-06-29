@@ -52,7 +52,6 @@ export const refreshAuth = async (token: string): Promise <IRefreshedAuth> => {
 }
 
 export const logout = async (refreshToken:string) => {
-  console.log('token', refreshToken)
   if (!refreshToken) return;
   const sessionDoc = await Session.findOne({ token: refreshToken, valid: true, tokenType: 'refresh' });
   if (!sessionDoc) return;

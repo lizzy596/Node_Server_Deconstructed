@@ -30,7 +30,7 @@
     "./node_modules/@types",
     "./types",
   ], 
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/config/authorization/roles.js"],
 
   "exclude": ["node_modules", "dist"]
 }
