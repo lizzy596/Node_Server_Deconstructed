@@ -7,9 +7,12 @@
 
 * **Create a complementary web and mobile client**
 
-* **Implement the ability to revoke/blacklist a bad session or token**
+* **Implement the ability to revoke/blacklist a bad session or token and walk through the process of invalidating the access of bad actor**
 
 * **Implement roles-based permissions and implement a route on the client that requires elevated privileges to access**
+
+
+
 
 
 ### **Introduction**
