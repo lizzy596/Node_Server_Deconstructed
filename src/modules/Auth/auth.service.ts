@@ -26,26 +26,28 @@ export const refreshAuth = async (token: string): Promise <IRefreshedAuth> => {
   try {
   const payload = await verifyJWT(token);
   if(!payload) {
-    throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+    throw ClientError.Unauthorized('Please  authenticate')
   }
   if(!payload.sub || typeof payload.sub !== 'string') {
-      throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+      throw ClientError.Unauthorized('Please authenticate')
     }
 
     const user = await userService.getUserById(payload.sub);
     if(!user) {
-      throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+      throw ClientError.Unauthorized('Please  authenticate')
+
     }
   const session = await sessionService.getSessionRecordByUserId(payload?.sub);
     if(!session) {
-      throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
-    }
+      throw ClientError.Unauthorized('Please  authenticate')
+}
     await sessionService.deleteSessionRecordsByUserId(payload.sub);
     const tokens = await generateAuthTokens(payload.sub);
     return { user, tokens };
  } catch (error) {
-  console.error(error)
-  throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+    console.error(error)
+    throw ClientError.Unauthorized('Please  authenticate')
+
  }
 
 

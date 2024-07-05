@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import config from '../../../config/config';
 import dayjs from "dayjs";
 import * as sessionService from '../Session/session.service.js'
+import ClientError from '../../../config/error/ClientError';
 
 
 
@@ -22,10 +23,28 @@ export const generateJWT = (payload: jsonPayload, expiration: string) => {
 return jwt.sign(payload, config.jwt.secret, {expiresIn: expiration});
 }
 
+export const verifyJWT = (token:string)  => {
+  try {
+    const payload = jwt.verify(token, config.jwt.secret);
+    return payload;
+  } catch (e) {
+    throw ClientError.Unauthorized('Invalid Credentials')
+  }
+};
 
-export const verifyJWT = async (token:string)  => {
-return jwt.verify(token, config.jwt.secret);
- };
+// export const verifyJWT = async (token:string)  => {
+//   try {
+//     const payload = await jwt.verify(token, config.jwt.secret);
+//     return payload;
+//   } catch (e) {
+//     throw ClientError.Unauthorized('Invalid Credentials')
+//   }
+// };
+
+
+// export const verifyJWT = async (token:string)  => {
+// return jwt.verify(token, config.jwt.secret);
+//  };
 
  export const generateAuthTokens = async (userId: string): Promise<IAuthTokens> => {
   await sessionService.deleteSessionRecordsByUserId(userId);

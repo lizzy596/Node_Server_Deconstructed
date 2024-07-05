@@ -16,6 +16,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
 });
 
 const login = catchAsync(async (req: Request, res: Response) => {
+  console.log('in login controller');
   const { email, password } = req.body;
   const user = await authService.login(email, password);
   if(!user) { 
@@ -26,8 +27,10 @@ const login = catchAsync(async (req: Request, res: Response) => {
   res.send({ user, tokens });
   });
 
+  
 const refreshAuthTokens = catchAsync(async (req: Request, res: Response) => {
-const refreshed = await authService.refreshAuth(req.cookies.refreshToken);
+  console.log('refreshAuthTokens controller')
+const refreshed = await authService.refreshAuth(req.cookies[config.jwt.refreshCookieName] || req.body?.refreshToken);
 setCookieToken(res, refreshed?.tokens?.refreshToken); 
 res.send(refreshed);
 });
