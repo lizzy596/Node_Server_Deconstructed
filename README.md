@@ -1236,3 +1236,28 @@ Issuing a new refresh token on each use and invalidate all credentials / log out
 A Unix timestamp specifies the number of seconds. A JSON Web Token uses the number of seconds. JavaScript Date uses the number of milliseconds.
 
 Any cookie that does not have an expiration set is considered a session cookie by the browser and deleted when the browser quits. As a result, even though the old session file may remain on the server, it is no longer accessible once the associated cookie is no longer being sent back by the browser.
+
+
+
+jwt cant truly log you out
+12:02
+Because the session material could be compromised. How do you revoke tokens on lost laptops? What if you accidentally checked the token into Github and realized your mistake? What if malware captured the token? You have to be able to revoke access on the server side.
+You can use JWTs and have a "revoked_sessions" table that works like a normal "sessions" table. At the start of the request, check if the token is in the "revoked_sessions" table and deny access if it is. But there simply isn't a point; this has the same performance and latency considerations that a normal sessions table has ... but with many more possible ways to screw it up. "Sessions with extra steps."
+12:04
+That said, I routinely use session cookies with a Redis KV session table to keep the JWT if I need it for other APIs etc. The one gotcha is making sure the random value for the session cookie doesn't already exist in Redis; using a timestamp-derived random string can help there, other than that, you're fine...
+12:07
+How do you revoke tokens on lost laptops (with jwt)?
+Have the user change their password, and store datetime_password_last_changed on the user model. Then just treat any tokens issued before that time as expired. There are some use cases where storing tokens might be necessary, but for most startups this is probably not a good idea. (edited) 
+12:11
+Because you don't need to check the DB every request! That's the cool part! You only hit the DB for requests that matter!
+For example, do you really need to check the DB to load this very page? If the auth token expiration is say, 5 minutes... does it really matter if a bad guy gets ahold of that token and loads this page? They can't post or vote because for those requests... you can pass the token to your auth server to be validated. 99% of your traffic is probably servicing the loading of this very page. 1% (or probably closer to 0.1%) is any kind of traffic that you actually care if the token hasn't expired within 5 minutes.
+The problem people get into is they think security is black and white. It's gray. Some things need to trade latency for security... like write traffic. For 99% of the read traffic on HN? Who cares... even 10 minutes or more might be okay depending on the business.
+People invent these complex pub-sub systems and stuff... they are working under the idea that all requests need to be super-secure. Most of it doesn't. I'd assert for most businesses.... 99% of the authenticated traffic could deal with a 5 minute max window after logout where somebody could maybe, theoretically impersonate somebody. And for the 1% of that traffic where it matters, you can always hit the DB.
+
+
+
+
+
+
+12:13
+The issue is not deleting the cookie. The issue is that the JWT can still be used as a valid session unless you have some sort of blocklist. Once you introduce a blocklist, you might as well ditch the JWT and use some opaque token stored in a table.
