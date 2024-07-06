@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import * as taskService from './task.service.js';
-import catchAsync from '../../config/utils/catchAsync.js';
+import catchAsync from '../../config/utils/catchAsync.util.js';
 import ClientError from '../../config/error/ClientError.js';
 //import pick from '../../config/utils/pick.js';
 
@@ -21,9 +21,8 @@ const createTask = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getTasks = catchAsync(async (req: Request, res: Response) => {
-      // @ts-ignore 
-  const result = await taskService.queryTasks(req.session.userId);
-  res.send(result);
+  const tasks = await taskService.queryTasks(req?.user?.id!);
+  res.send(tasks);
 });
 
 

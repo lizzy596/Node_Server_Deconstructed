@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import * as userService from './user.service.js';
-import catchAsync from '../../config/utils/catchAsync.js';
+import catchAsync from '../../config/utils/catchAsync.util.js';
 import ClientError from '../../config/error/ClientError.js';
-import pick from '../../config/utils/pick.js';
+import pick from '../../config/utils/pick.util.js';
 
 const getUser = catchAsync(async (req: Request, res: Response) => {
   const user = await userService.getUserById(req.params.userId!);

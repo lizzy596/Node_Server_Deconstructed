@@ -1,5 +1,5 @@
 import { object, optional, string} from 'superstruct';
-import { Email, MongoId } from "../../config/validators/custom.validators.js";
+import { Email } from "../../config/validators/custom.validators.js";
 
 export const register = object({
   body: object({
@@ -15,6 +15,6 @@ export const login = object({
 });
 
 export const logout = object({
-  params: object({ taskId: MongoId }),
+body: object({ refreshToken: optional(string()) }),
 });
 

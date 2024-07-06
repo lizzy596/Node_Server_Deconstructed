@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import taskRoute from '../../modules/Task/task.route.js'
 import userRoute from '../../modules/User/user.route.js'
 import authRoute from '../../modules/Auth/auth.route.js'
+import devRoute from '../../modules/Dev/dev.route.js'
 import config from '../../config/config.js';
 
 const router: Router = express.Router();
@@ -18,6 +19,10 @@ const defaultRoutes: { path: string; route: Router }[] = [
   {
     path: '/auth',
     route: authRoute,
+  },
+  {
+    path: '/dev',
+    route: devRoute,
   },
 ];
 

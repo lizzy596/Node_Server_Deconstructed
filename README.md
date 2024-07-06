@@ -1,17 +1,34 @@
-# **Chapter 4 Authentication and Authorization**
-
-A RESTful request by definition stateless. The server does not remember anything about the requester between requests. In practice there are many occasions where information about the requester needs to be persisted between requests and much debate and opinion exists regarding implementing this statefulness securely and effectively.
+# **Chapter 4 - Authentication and Authorization**
 
 
-**Authentication**: the process of verifying that you are who you claim to be (401 unauthorized )
+## **Objectives**
 
+* **Implement Authentication using both sessions and tokens** 
+
+* **Create a complementary web and mobile client**
+
+* **Implement the ability to revoke/blacklist a bad session or token and walk through the process of invalidating the access of bad actor**
+
+* **Implement roles-based permissions and implement a route on the client that requires elevated privileges to access**
+
+
+
+
+
+### **Introduction**
+
+<span style="font-size:1.2em;">A RESTful request by definition stateless. The server does not remember anything about the requester between requests. In practice there are many occasions where information about the requester needs to be persisted between requests and much debate and opinion exists regarding implementing this statefulness securely and effectively.</span>
+
+
+<span style="font-sze:1.2em;"><ins>**Authentication**:</ins> </span>
+ the process of verifying that some entity is what it claims to be (401 unauthorized)
 Authentication can be based on one or more of the following:
 
-Something the user knows (password, PIN, pattern, etc.)
-Something the user has (SIM card, one-time password generator, or hardware token)
-A biometric property of the user (fingerprint, retina, voice)
+* Something the user knows (password, PIN, pattern, etc.)
+* Something the user has (SIM card, one-time password generator, or hardware token)
+* A biometric property of the user (fingerprint, retina, voice)
 
-**Authorization**: the process of determining to which resources you have access (403 forbidden)
+<span style="font-sze:1.2em;"><ins>**Authorization**:</ins> the process of determining to which resources you have access (403 forbidden)</span>
 
 
 ## **Password Security Considerations**
@@ -51,7 +68,12 @@ Some of the common options available when setting cookies include:
 
 ### **Sessions**
 
-Unlike a typical cookie, which stores data within client-side storage, a session is used to store relevant client information server-side. Only a small bit of information (e.g. session id or opaque token i.e.  a random unique string of characters issued by the authorization server.  ) is stored on the client, and that id is sent back to the server on every subsequent request and is used to identify the given session and retrieve information. Session information doesn't need to be stored in a DB, but rather it needs to be persisted between requests (i.e. you can use an in-memory data store like a redis caching layer). Each user is identified by a session ID. This is an example of an opaque token (no third party can extract data out of the session and only the issuer or server can map back to relevant data). Stored in server-memory (filesystem), cache (redis), DB
+Unlike a typical cookie, which stores data within client-side storage, a session is used to store relevant client information server-side. Only a small bit of information (e.g. session id or opaque token i.e.  a random unique string of characters issued by the authorization server) is stored on the client, and that id is sent back to the server on every subsequent request and is used to identify the given session and retrieve information. Session information doesn't need to be stored in a DB, but rather it needs to be persisted between requests (i.e. you can use an in-memory data store like a redis caching layer). Each user is identified by a session ID. This is an example of an opaque token (no third party can extract data out of the session and only the issuer or server can map back to relevant data). Stored in server-memory (filesystem), cache (redis), or DB.
+
+Session Based Authentication Workflow:
+
+When user logins in:
+When user logs out:
 
 
 Session cookies are removed when the client shuts down.
@@ -60,49 +82,43 @@ Session cookies are removed when the client shuts down.
 
 ### **JSON Web Tokens**
 
-JWTs
+JWTs are a compact and self-contained way for securely transmitting information between parties as a JSON object.  While the information contained within the JWT payload can be encrypted, the real value of the token is the ability to verify the
+integrity of the token via its digital signature. In other words you can know whether or not your server is in fact the one which issued and signed the token. The server does not have to store any session data in memory. One of the criticisms
+ of JWTs is that they are not easily expirable, as they are self-contained and the token is valid until it expires. The way this limitation is mitigated is by having a short and long expiry token and by keeping token records in the database whose validity
+ can be revoked and always cross-checking the jwt against the token record in the database (although critiques will say this undermines one of the major value adds of jwts, which is that you can avoid a DB lookup). JWTs is that they are just a way to perform user authentication with the backend without the backend having to make a database query with every web hit/api call. That's all. That's what they're designed to do, and they work great for it.
+ 
+
+
+**Token Based Authentication Workflow:**
+
+1. Upon a successful registration or login two jwt tokens are generated, a short-lived access token and longer-lived refresh token, they are then returned in the response. 
+2. The access token is stored in memory on both web and mobile apps and the refresh token is stored in secure storage on the device for mobile apps and in an http-only cookie on web apps (but what about cookie that will stored on mobile apps?--even though cookies can be set on mobile devices, ios tends to destory cookies before the time the developer sets (this is potentially resolved by setting a maxAge on the cookie)). 
+3. When the user attempts to access to a protected route, the access token accompanies the request in the request headers as a bearer token.
+4. The request then hits the auth middleware where the jwt is extracted from the header, its verified against the server held secret to determine if the token  was indeed issued by the server and is still valid the token payload is decoded and if a valid user is found in the database with appropriate permissions to access a given resource, that user id is added to the request object for use during the request life cycle. 
+5.When the access token expires a timer expires on the client side, triggering a 
+When user logs out:
+
+
+**When a user changes their password**
+If a user changes their password on any device, then revoke all their refresh tokens forcing them to log in again as soon as their access token expires. This does leave a 'window of uncertainty' but that's unavoidable without hitting a db every time.
 
 
 
- A JWT may encode the complete session state as a JSON object. Therefore, the server doesn't have to store any session data or authentication information.
-
-There is no way I know of to arbitrarily invalidate a token without involving a database one way or another.
-
-Be careful with Approach 2 if your service can be accessed on several devices. Consider the following scenario...
-
-        User signs in with iPad, Token 1 issued and stored.
-        User signs in on website. Token 2 issued. User logs out.
-        User tries to use iPad, Token 1 was issued before user logged out from website, Token 1 now considered invalid.
-
-You might want to look at the idea of refresh tokens although these require database storage too.
-
-Also see here for a good SO discussion regarding a similar problem, particular IanB's solution which would save some db calls.
-
-Proposed solution Personally, this is how I'd approach it...user authenticates, issued with access token with a short expiry (say 15 mins) and a refresh token valid either for a much longer period or indefinitely. Store a record of this refresh token in a db.
-
-Whenever the user is 'active', issue a new auth token each time (valid for 15 mins each time). If the user is not active for over 15 minutes and then makes a request (so uses an expired jwt), check the validity of the refresh token. If it's valid (including db check) then issue a new auth token.
-
-If a user 'logs out' either on a device or through a website then destroy both access refresh tokens client side and importantly revoke the validity of the refresh token used. If a user changes their password on any device, then revoke all their refresh tokens forcing them to log in again as soon as their access token expires. This does leave a 'window of uncertainty' but that's unavoidable without hitting a db every time.
-
-Using this approach also opens up the possibility of users being able to 'revoke' access to specific devices if required as seen with many major web apps.
 
 
 
-Honestly, it sounds like you and your sources both don't really understand what JWTs are. For example anyone comparing JWTs to cookies doesn't understand what a JWT is, because you can (and often do) store a JWT in a cookie.
+**AUTHORIZATION**
 
-The tl;dr for JWTs is that they are just a way to perform user authentication with the backend without the backend having to make a database query with every web hit/api call. That's all. That's what they're designed to do, and they work great for it.
 
-If the cost of the DB call isn't a concern to you or your team, then you can use a traditional session just fine. cookie-session is one way to do this with express.js, the traditional node.js webserver piece.
 
-The "reason" most node.js "creators" talk mostly about JWTs and not other things like sessions is a mystery though, you're right. My guess is that sessions just aren't "sexy."
 
  You have a few options for managing complex permission sets. Your choices are:
 
-    trying to embed them in a cookie or JWT (I.e. the quasi-stateless option). In this case you’re not having to look them up every request from a central source. However space is limited and a user that has thousands of roles across a multitude of micro service use cases in a large distributed system cannot embed permissions in cookie or JWT.
+    -trying to embed them in a cookie or JWT (I.e. the quasi-stateless option). In this case you’re not having to look them up every request from a central source. However space is limited and a user that has thousands of roles across a multitude of micro service use cases in a large distributed system cannot embed permissions in cookie or JWT.
 
-    using a central source. Some kind of repository is required to look the permissions based on the user or the user role, but you’re going to need to do it for every request and you’re probably going to want to cache it, and that leads to complexity.
+    -using a central source. Some kind of repository is required to look the permissions based on the user or the user role, but you’re going to need to do it for every request and you’re probably going to want to cache it, and that leads to complexity.
 
-    using a sidecar. This kind of approach is available in container environments such as k8s via DAPR, CERBOS, Orleans. Think Service Fabrik. This very similar to a cache, but you’ve moved the distribution and management of that distributed cache to the container platform Framework.
+    -using a sidecar. This kind of approach is available in container environments such as k8s via DAPR, CERBOS, Orleans. Think Service Fabrik. This very similar to a cache, but you’ve moved the distribution and management of that distributed cache to the container platform Framework.
 
 
 
@@ -940,3 +956,283 @@ Generally, session information is sent using cookies in web applications. Howeve
 JavaScript has a number of unsafe and dangerous legacy features that should not be used. In order to remove these features, ES5 included a strict mode for developers. With this mode, errors that were silent previously are thrown. It also helps JavaScript engines perform optimizations. With strict mode, previously accepted bad syntax causes real errors. Because of these improvements, you should always use strict mode in your application. In order to enable strict mode, you just need to write "use strict"; on top of your code.
 
 The following code will generate a ReferenceError: Can't find variable: y on the console, which will not be displayed unless strict mode is used:
+
+
+
+.env variables are always set as strings
+
+
+**Javascript Dates**
+
+Timezones: Two timezones matter in JS:
+-The Local Timezone your computer is in
+-UTC (GMT) 
+
+By default all but one date method in JS gives date/time in local time. You only get UTC if you specify UTC. 
+
+Creating a Date in JS:
+
+create a date with new Date() used four ways
+
+**with date string**
+new Date('1987-07-09')
+always formate date-strings with ISO 8601 (which is accepted world wide) `YYYY-MM-DDTHH:mm:ss.sssZ`, 
+
+Here’s what the values mean:
+
+    YYYY: 4-digit year
+    MM: 2-digit month (where January is 01 and December is 12)
+    DD: 2-digit date (0 to 31)
+    -: Date delimiters
+    T: Indicates the start of time
+    HH: 24-digit hour (0 to 23)
+    mm: Minutes (0 to 59)
+    ss: Seconds (0 to 59)
+    sss: Milliseconds (0 to 999)
+    :: Time delimiters
+    Z: If Z is present, date will be set to UTC. If Z is not present, it’ll be Local Time. (This only applies if time is provided.)
+
+Hours, minutes, seconds, and milliseconds are optional. 
+
+Problem with using date-strings is that if you live in an area BEHIND GMT you'll get a date that's a day behind your intended date, that's because if you create a date with date-string without a time, you get a date set in UTC
+
+If you want to create a date in Local Time with the date-string method, you need to include the time. When you include time, you need to write the HH and mm at a minimum
+new Date('2019-06-11T00:00') The whole Local Time vs. UTC thing with date-strings can be a possible source of error that’s hard to catch. So, I recommend you don’t create dates with date strings.
+
+**With arguments**
+
+You can pass in up to seven arguments. Y, M, D, H, Min, Seconds, and Milliseconds
+new Date(2019, 5, 11, 5, 23, 59)
+
+remember that months are zero-indexed
+Dates created with arguments are in local time.
+
+**With Timestamps**
+In JavaScript, a timestamp is the amount of milliseconds elapsed since 1 January 1970 (1 January 1970 is also known as Unix epoch time). From my experience, you rarely use timestamps to create dates. You only use timestamps to compare between different dates (more on this later).
+new Date(1560211200000)
+
+**with no arguments**
+
+new Date()
+If you create a date without any arguments, you get a date set to the current time (in Local Time).
+
+
+Summary about creating dates
+
+    You can create date with new Date().
+    There are four possible syntaxes:
+        With a date string
+        With arguments
+        With timestamp
+        With no arguments
+    Never create a date with the date string method.
+    It’s best to create dates with the arguments method.
+    Remember (and accept) that month is zero-indexed in JavaScript.
+
+    **Date Formatting in JS**
+
+    No easy way unlike with other languages. Often rely on libraries.
+    The native Date object comes with seven formatting methods. Each of these seven methods give you a specific value (and they’re quite useless).
+    const date = new Date(2019, 0, 23, 17, 23, 42)
+    toString gives you Wed Jan 23 2019 17:23:42 GMT+0800 (Singapore Standard Time)
+    toDateString gives you Wed Jan 23 2019
+    toLocaleString gives you 23/01/2019, 17:23:42
+    toLocaleDateString gives you 23/01/2019
+    toGMTString gives you Wed, 23 Jan 2019 09:23:42 GMT
+    toUTCString gives you Wed, 23 Jan 2019 09:23:42 GMT
+    toISOString gives you 2019-01-23T09:23:42.079Z
+
+    Let’s say you want something like Thu, 23 January 2019. To create this value, you need to know (and use) the date methods that comes with the Date object.
+
+To get dates, you can use these four methods:
+
+    getFullYear: Gets 4-digit year according to local time
+    getMonth: Gets month of the year (0-11) according to local time. Month is zero-indexed.
+    getDate: Gets day of the month (1-31) according to local time.
+    getDay: Gets day of the week (0-6) according to local time. Day of the week begins with Sunday (0) and ends with Saturday (6).
+
+
+    This is used to get you month names:
+const months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+]
+
+const monthIndex = d.getMonth()
+const monthName = months[monthIndex]
+console.log(monthName) // January
+
+const monthName = months[d.getMonth()]
+console.log(monthName) // January
+
+const days = [
+  'Sun',
+  'Mon',
+  'Tue',
+  'Wed',
+  'Thu',
+  'Fri',
+  'Sat'
+]
+const dayName = days[d.getDay()] // Thu
+
+const formatted = `${dayName}, ${date} ${monthName} ${year}`
+console.log(formatted) // Thu, 23 January 2019
+    If you ever need to create a custom-formatted time, you can use the following methods:
+
+    getHours: Gets hours (0-23) according to local time.
+    getMinutes: Gets minutes (0-59) according to local time.
+    getSeconds: Gets seconds (0-59) according to local time.
+    getMilliseconds: Gets milliseconds (0-999) according to local time.
+
+Next, let’s talk about comparing dates.
+
+If you want to know whether a date comes before or after another date, you can compare them directly with >, <, >= and <=.
+
+const earlier = new Date(2019, 0, 26)
+const later = new Date(2019, 0, 27)
+
+console.log(earlier < later) // true
+
+It’s more difficult if you want to check if two dates fall exactly at the same time. You can’t compared them with == or ===.
+
+const isSameTime = (a, b) => {
+  return a.getTime() === b.getTime()
+}
+
+const a = new Date(2019, 0, 26)
+const b = new Date(2019, 0, 26)
+console.log(isSameTime(a, b))
+
+If you want to check whether two dates fall on the same day, you can check their getFullYear, getMonth and getDate values.
+
+const isSameDay = (a, b) => {
+  return a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate()=== b.getDate()
+}
+
+const a = new Date(2019, 0, 26, 10) // 26 Jan 2019, 10am
+const b = new Date(2019, 0, 26, 12) // 26 Jan 2019, 12pm
+console.log(isSameDay(a, b)) // true
+
+Getting a date from another date
+
+There are two possible scenarios where you want to get a date from another date.
+
+    Set a specific date/time value from another date.
+    Add/subtract a delta from another date.
+
+Setting a specific date/time
+
+You can use these methods to set a date/time from another date:
+
+    setFullYear: Set 4-digit year in Local Time.
+    setMonth: Set month of the year in Local Time.
+    setDate: Set day of the month in Local Time.
+    setHours: Set hours in Local Time.
+    setMinutes: Set minutes in Local Time.
+    setSeconds: Set seconds in Local Time.
+    setMilliseconds: Set milliseconds in Local Time.
+
+For example, if you want to set a date to the 15th of the month, you can use setDate(15).
+
+Adding/Subtracting delta from another date
+
+A delta is a change. By adding/subtracting delta from another date, I mean this: You want to get a date that’s X from another date. It can be X year, X month, X day, etc.
+
+To get a delta, you need to know the current date’s value. You can get it using these methods:
+
+    getFullYear: Gets 4-digit year according to local time
+    getMonth: Gets month of the year (0-11) according to local time.
+    getDate: Gets day of the month (1-31) according to local time.
+    getHours: Gets hours (0-23) according to local time.
+    getMinutes: Gets minutes (0-59) according to local time.
+    getSeconds: Gets seconds (0-59) according to local time.
+    getMilliseconds: Gets milliseconds (0-999) according to local time.
+
+There are two general approaches to add/subtract a delta. The first approach is more popular on Stack Overflow. It’s concise, but harder to grasp. The second approach is more verbose, but easier to understand.
+
+Let’s go through both approaches.
+
+Say you want to get a date that’s three days from today. For this example, let’s also assume today is 28 March 2019. (It’s easier to explain when we’re working with a fixed date).
+
+const today = new Date(2019, 2, 28)
+First, we create a new Date object (so we don’t mutate the original date)
+const finalDate = new Date(today)
+Next, we need to know the value we want to change. Since we’re changing days, we can get the day with getDate.
+const currentDate = today.getDate()
+We want a date that’s three days from today. We’ll use add the delta (3) to the current date.
+finalDate.setDate(currentDate + 3)
+const today = new Date(2019, 2, 28)
+const finalDate = new Date(today)
+finalDate.setDate(today.getDate() + 3)
+
+console.log(finalDate) // 31 March 2019
+
+Here, we use getFullYear, getMonth, getDate and other getter methods until we hit the type of value we want to change. Then, we use create the final date with new Date.
+
+const today = new Date(2019, 2, 28)
+
+// Getting required values
+const year = today.getFullYear()
+const month = today.getMonth()
+const day = today.getDate()
+
+// Creating a new Date (with the delta)
+const finalDate = new Date(year, month, day + 3)
+
+console.log(finalDate) // 31 March 2019
+
+If you provide Date with a value that’s outside of its acceptable range, JavaScript recalculates the date for you automatically.
+
+Here’s an example. Let’s say we set date to 33rd March 2019. (There’s no 33rd March on the calendar). In this case, JavaScript adjusts 33rd March to 2nd April automatically.
+new Date(2019, 2, 33)
+This means you don’t need to worry about calculating minutes, hours, days, months, etc. when creating a delta. JavaScript handles it for you automatically.
+new Date(2019, 2, 30 + 3)
+
+Javascript has many Date issues:
+
+    It doesn’t support Dates but only Datetimes (all date objects are unix timestamps).
+    It doesn’t support time zones other than the user’s local time and UTC.
+    The parser’s behaviour is inconsistent from one platform to another.
+    The Date object is mutable.
+    The behaviour of daylight saving time is unpredictable.
+    No support for non-Gregorian calendars.
+    No date arithmetic like add or subtract time.
+
+
+
+    You are making something simple very complex. You don't encode payload in the app itself:
+use HTTPS, you must not worry about encrypting data in the code
+don't configure node to use HTTPS, use a reverse-proxy with a ssl cert and you are done
+the querystring is encrypted by SSL, but the best practice is to not use it for sensitive data
+for sensitive data use the body, it's encrypted too
+That's it. Putting data in the querystring or body is secure as long as you use HTTPS.
+11:26
+This is a security issue common with any naive JWT implementation, but it’s not unique to JWTs, any token system can ultimately fall prey here. There is no way to guarantee 100% security. That token is like a key to a house, they work fine to lock the correct doors; but if a key is lost or stolen it works just as well for anyone else.
+To combat these issues, you should have a few additional layers of security.
+Sessions. I don’t mean a session storage/cookie or anything, but some identifier claim in the token that lets your server identify a token. This allows you to immediately invalidate any tokens you want for any reason. Did an admin token leak? All admin tokens are immediately revoked. Now that leaked token is worthless. You just changed the locks on the house.
+Two tokens: The authentication token and the refresh token. Ideally they get stored somewhat apart from each other. The idea here is that a refresh tokens lives for A hours (however long your actual logged in state is) and then Auth tokens that live for B minutes. These lifetimes are somewhat arbitrary and should be determined by the security needs of your application. Like a financial application? That Auth token may essentially boil down to a nonce. A low-risk personal project? Maybe 30 minutes or more is fine. The Auth token needs a claim identifying its associated refresh token and the refresh token needs a claim allowing the server to identify it’s still valid (“session”).
+When an authentication token is expired you send the expired token and it’s refresh token to the server and reissue a new version of each (do not extend the lifetime of refresh tokens). Rotating the refresh token as well as the Auth token is just an additional layer of security - it’s only good for one refresh and if two users are using it then the bad actor either misses the refresh or the main user is alerted when they miss the refresh and can then invalidate their sessions.
+For authentication purposes you should never trust anything you did not issue and cannot verify. Your server does issue the UUIDs but you can’t verify that you gave the user that UUID so when they say “I’m user X” and give you an id you say 401 I don’t know you. JWT works well here because you put your claims in the token (like user id, session id, refresh token id, etc) and then you generate a signature with a server side secret. This signature ensures the user cannot change the token payload and allows you to verify that the token was generated by you. You can then trust (to the best of your knowledge) the data in the token. It’s still prone to being stolen, intercepted, etc. you cannot solve all the security problems yourself. You can’t manage the token after it leaves your server.
+This list is not exhaustive and there is a whole host of additional aspects you want to be aware of and consider to ensure your server is secure. The best resource for security like this is OWASP, and the RFCs for OAuth and stuff have some good reading. Additionally, authentication is one of those “simple tasks” where you end up drowning in the minutia which is why it’s usually better to leverage an authentication service that manages all that layer for you. You’re bound to miss something and that something will be what an attacker exploits.
+It may not be required to send the expired access token alongside a refresh token but I like to do it. Usually the request layer is already configured to do it automatically so it’s additional overhead/work (not talking about performance here) to remember this one request needs it removed. It then one additional verification you can perform and if you store the tokens apart in some way then it’s not as easy to nab an access token and the refresh token (but always still possible). Does it solve a lot of issues? Probably not. But it doesn’t hurt anything.
+Refresh tokens let the user get a new access token. In a naive implementation (without rotation) I could use one refresh token and get as many access tokens as I want from it until it expires. That’s good but also bad. Which is where rotation comes into play. Each time a refresh token is submitted you issue a new one guaranteeing that any token is good only once. This means any compromised access token/refresh token combination is only valid until they both expire or the refresh token is used. If a token is replayed you can act on the potential that a user has had their session compromised.
+It’s all just minor changes that help add incremental bits of secure layers. Since you can’t be perfectly secure you just need to make it more difficult to break.
+Issuing a new refresh token on each use and invalidate all credentials / log out the user when detecting refresh token reuse (what else could you do?) is a good idea, the latter is even in the standard.
+
+
+A Unix timestamp specifies the number of seconds. A JSON Web Token uses the number of seconds. JavaScript Date uses the number of milliseconds.
+
+Any cookie that does not have an expiration set is considered a session cookie by the browser and deleted when the browser quits. As a result, even though the old session file may remain on the server, it is no longer accessible once the associated cookie is no longer being sent back by the browser.

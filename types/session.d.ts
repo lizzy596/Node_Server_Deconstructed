@@ -1,9 +1,8 @@
-
-import { MongoId } from "../src/config/validators/custom.validators.js";
+import { MongoId } from '../src/config/validators/custom.validators.js';
 
 declare module 'express-session' {
   interface SessionData {
-      user: string;
+    user: string;
   }
 }
 export default 'express-session';
