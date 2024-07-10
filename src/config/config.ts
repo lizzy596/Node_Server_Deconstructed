@@ -1,4 +1,4 @@
-import { enums, defaulted, validate, object, string } from 'superstruct';
+import { enums, defaulted, validate, object, string, number } from 'superstruct';
 import path from 'path';
 import dotenv from 'dotenv';
 
@@ -13,6 +13,11 @@ const envVarsSchema = object({
     JWT_ACCESS_EXPIRATION_MINUTES: string(),
     JWT_REFRESH_EXPIRATION_DAYS: string(),
     JWT_REFRESH_COOKIE: string(),
+    SMTP_HOST: string(),
+    SMTP_PORT: number(),
+    SMTP_USERNAME:string(),
+    SMTP_PASSWORD:string(),
+    EMAIL_FROM:string(),
   });
 
 const [error, value] = validate(envVars.parsed, envVarsSchema);
@@ -38,6 +43,17 @@ const config = {
     origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
     credentials: true,
   },
+  email: {
+    smtp: {
+      host: value.SMTP_HOST,
+      port: value.SMTP_PORT,
+      auth: {
+        user: value.SMTP_USERNAME,
+        pass: value.SMTP_PASSWORD,
+      },
+    },
+    from: value.EMAIL_FROM
+  }
  };
 
 export default config;
