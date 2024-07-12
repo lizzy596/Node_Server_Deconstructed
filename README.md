@@ -3,13 +3,15 @@
 
 ## **Objectives**
 
-* **Implement Authentication using both sessions and tokens** 
+* **Implement Authentication using both sessions and tokens, you should be able to detail every step in the process and some of the major security risks and mitigation steps available** 
 
-* **Create a complementary web and mobile client**
+* **Setup reset password and email verification functionality, take security methods to protect against DDOS and brute force attacks**
+
+* **Create a complementary web and mobile client to interface with the server's authentication setup**
 
 * **Implement the ability to revoke/blacklist a bad session or token and walk through the process of invalidating the access of bad actor**
 
-* **Implement roles-based permissions and implement a route on the client that requires elevated privileges to access**
+* **Implement roles-based permissions and implement a route on the client application that requires elevated privileges to access**
 
 
 
