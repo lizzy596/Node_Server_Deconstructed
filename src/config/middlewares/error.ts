@@ -1,35 +1,23 @@
 import { Request, Response, NextFunction } from 'express';
 import ClientError from '../error/ClientError.js';
 import httpStatus from 'http-status';
-//import mongoose from 'mongoose';
+import config from '../config.js';
 
-const config = { env: "development" };
 
-// Converts mongoose errors to client errors
-// You must also pass the err to next, so that any errors that are not mongoose.errors are still passed down the chain.
-// const errorConverter = (err: any, _req: Request, _res: Response, next: NextFunction) => {
-//   if (err) {
-//     if (err instanceof mongoose.Error) {
-//       throw new ClientError(httpStatus.BAD_REQUEST, "Invalid field input");
-//     } else {
-//       next(err);
-//     }
-//   }
-// };
+
+//This will catch certain mongoose errors and then present a given message to the client application 
 
 const errorConverter = (err: any, _req: Request, _res: Response, next: NextFunction) => {
-  console.log('error converter:',err)
-  if (err.code && err.code === 11000) {
+  if (err.name === 'MongoServerError' && err.code === 11000) {
      throw ClientError.BadRequest( `Duplicate value entered for form field, please choose another value`);
-    
-  }
-  if (err.name === 'CastError') {
-    throw ClientError.BadRequest('Item not found');
-  } 
+     }
+     if (err.name === 'ValidationError' || err.name === 'CastError') {
+      throw ClientError.BadRequest('Invalid data type for entry, please choose another value');
+    } 
   next(err);
 };
 
-// Returns either a client error or a general error
+// Returns either a client error or a more general error
 const errorHandler = (err: any, _req: Request, res: Response, _next: NextFunction) => {
   const response = {
     code: err.code || httpStatus.INTERNAL_SERVER_ERROR,

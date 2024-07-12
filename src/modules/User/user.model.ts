@@ -4,15 +4,6 @@ import bcrypt from 'bcryptjs';
 import toJSON from "../../config/db/plugins/toJSON.plugin.js";
 import paginate from "../../config/db/plugins/paginate.plugin.js";
 
-// export interface IUser extends Document {
-//   name: string;
-//   email: string;
-//   password: string;
-//   role: string;
-//   timestamps: string;
-// }
-
-
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -22,13 +13,13 @@ export interface IUser extends Document {
   isEmailVerified: boolean;
 }
 
-interface IUserMethods {
+export interface IUserMethods {
   // searchableFields(): string;
-  // isEmailTaken(): boolean;
+  isEmailTaken(): boolean;
   isPasswordMatch(password: string): boolean;
 }
 
-interface UserModel extends Model<IUser, {}, IUserMethods> {
+export interface UserModel extends Model<IUser, {}, IUserMethods> {
   createFully(): Promise<HydratedDocument<IUser, IUserMethods>>;
 }
 const schema = new Schema<IUser, UserModel, IUserMethods>({

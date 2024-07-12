@@ -1,10 +1,15 @@
 import User, { IUser} from "./user.model.js";
-import {IOptions, QueryResult} from "config/db/plugins/paginate.plugin.js";
+import {IOptions, QueryResult} from "../../config/db/plugins/paginate.plugin.js";
+import ClientError from "../../config/error/ClientError.js";
 
 
-
+//@ts-ignore
 export const createUser = async (userBody: any): Promise<IUser> => {
-return User.create(userBody);
+  //@ts-ignore
+if(await User.isEmailTaken(userBody)) {
+  throw ClientError.BadRequest('Email is already taken');
+}
+  
 };
 
 export const queryUsers = async (filter: Record<string, any>, options: IOptions, search: string): Promise<QueryResult> => {
