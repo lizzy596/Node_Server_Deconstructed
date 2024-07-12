@@ -5,14 +5,16 @@ import catchAsync from '../../config/utils/catchAsync.util.js';
 import ClientError from '../../config/error/ClientError.js';
 import * as authService from './auth.service.js'
 import * as userService from '../User/user.service.js';
-import { setCookieToken, clearCookieToken } from './utils/cookie.util.js';
-import { generateAuthTokens } from './utils/jwt.util.js';
+import * as emailHelper from './helpers/email.helper.js';
+import { setCookieToken, clearCookieToken } from './helpers/cookie.helper.js';
+import { generateAuthTokens, generateEmailVerificationToken } from './helpers/jwt.helper.js';
 
 
 const register = catchAsync(async (req: Request, res: Response) => {
-  const user = await userService.createUser(req.body)
-  res.cookie("userId", user.id, { maxAge: 90000000 });
-  res.status(httpStatus.CREATED).send({ user });
+  const user = await userService.createUser(req.body);
+  const token = await generateEmailVerificationToken(user.id)
+  await emailHelper.sendVerificationEmail(user.email, token, user.name)
+  res.status(httpStatus.NO_CONTENT).send();
 });
 
 const login = catchAsync(async (req: Request, res: Response) => {
@@ -22,6 +24,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
     throw ClientError.Unauthorized("Invalid credentials");
   }
   const tokens = await generateAuthTokens(user._id)
+  console.log('token', tokens)
   await setCookieToken(res, tokens.refreshToken)
   res.send({ user, tokens });
   });
@@ -45,6 +48,18 @@ const revokeAuthSession = catchAsync(async (_req: Request, _res: Response) => {
 
 })
 
+const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+  const { token } = req.body;
+  if(!token) return;
+  try {
+    await authService.verifyEmail(token);
+  } catch (err) {
+    throw ClientError.BadRequest('Invalid credentials');
+  }
+  res.status(httpStatus.OK).send('ok');
+
+});
+
 
 
 export {
@@ -52,5 +67,6 @@ export {
   login,
   refreshAuthTokens,
   logout,
-  revokeAuthSession
+  revokeAuthSession,
+  verifyEmail,
 };

@@ -1,6 +1,7 @@
 import mongoose, {Schema, Model } from "mongoose";
 import toJSON from "../../../config/db/plugins/toJSON.plugin.js";
 import paginate from "../../../config/db/plugins/paginate.plugin.js";
+import tokenTypes from './token.types.js';
 
 
 export interface Paginator {
@@ -30,6 +31,7 @@ const schema = new Schema<ISession, SessionModel>(
     },
     tokenType: {
       type: String,
+      enum: [tokenTypes.REFRESH, tokenTypes.RESET_PASSWORD, tokenTypes.VERIFY_EMAIL],
       required: true,
     },
     valid: {

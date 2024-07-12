@@ -7,8 +7,8 @@ export const createSessionRecord = async (sessionBody: ISession): Promise<ISessi
   return Session.create(sessionBody);
 };
 
-export const getSessionRecordByUserId = async (userId: string) => {
-  return await Session.findOne({user: userId, valid: true });
+export const getSessionRecordByUserId = async (userId: string, tokenType: string) => {
+  return await Session.findOne({user: userId, tokenType, valid: true });
 };
 
 export const invalidateAuthSession = async (user: string): Promise<ISession | null> => {
@@ -22,3 +22,7 @@ export const deleteSessionById = async (userId: string) => {
 export const deleteSessionRecordsByUserId = async (userId: string) => {
     return await Session.deleteMany({user: userId });
 };
+
+export const deleteSessionRecord = async (userId: string, tokenType: string) => {
+ return await Session.deleteMany({user: userId, tokenType: tokenType});
+}

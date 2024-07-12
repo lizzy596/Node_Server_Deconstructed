@@ -4,7 +4,7 @@ import {IOptions, QueryResult} from "config/db/plugins/paginate.plugin.js";
 
 
 export const createUser = async (userBody: any): Promise<IUser> => {
-  return User.create(userBody);
+return User.create(userBody);
 };
 
 export const queryUsers = async (filter: Record<string, any>, options: IOptions, search: string): Promise<QueryResult> => {

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyJWT } from '../../modules/Auth/utils/jwt.util';
+import { verifyJWT } from '../../modules/Auth/helpers/jwt.helper';
 import ClientError from '../error/ClientError';
 import * as userService from '../../modules/User/user.service';
 import { applicationRoles, rolePermissions } from '../permissions';

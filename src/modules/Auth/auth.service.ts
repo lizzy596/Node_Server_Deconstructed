@@ -4,7 +4,8 @@ import ClientError from '../../config/error/ClientError.js';
 import * as sessionService from './Session/session.service.js';
 import Session from './Session/session.model.js';
 import * as userService from '../User/user.service.js'
-import { verifyJWT, generateAuthTokens, IAuthTokens } from './utils/jwt.util.js';
+import { verifyJWT, generateAuthTokens, IAuthTokens } from './helpers/jwt.helper.js';
+import tokenTypes from './Session/token.types.js';
 
 
 
@@ -24,27 +25,20 @@ export const login = async (email: string, password: string): Promise<IUser> => 
 
 export const refreshAuth = async (token: string): Promise <IRefreshedAuth> => {
   try {
-  const payload = await verifyJWT(token);
-  if(!payload) {
-    throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
-  }
-  if(!payload.sub || typeof payload.sub !== 'string') {
-      throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
-    }
-
-    const user = await userService.getUserById(payload.sub);
+  const userId = await verifyJWT(token);
+  const user = await userService.getUserById(userId);
     if(!user) {
       throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
     }
-  const session = await sessionService.getSessionRecordByUserId(payload?.sub);
+  const session = await sessionService.getSessionRecordByUserId(user.id, tokenTypes.REFRESH );
     if(!session) {
       throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
     }
-    await sessionService.deleteSessionRecordsByUserId(payload.sub);
-    const tokens = await generateAuthTokens(payload.sub);
+    await sessionService.deleteSessionRecordsByUserId(user.id);
+    const tokens = await generateAuthTokens(user.id);
     return { user, tokens };
  } catch (error) {
-  console.error(error)
+
   throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
  }
 
@@ -53,10 +47,42 @@ export const refreshAuth = async (token: string): Promise <IRefreshedAuth> => {
 
 export const logout = async (refreshToken:string) => {
   if (!refreshToken) return;
-  const sessionDoc = await Session.findOne({ token: refreshToken, valid: true, tokenType: 'refresh' });
+  const sessionDoc = await Session.findOne({ token: refreshToken, valid: true, tokenType: tokenTypes.REFRESH });
   if (!sessionDoc) return;
   return sessionService.deleteSessionRecordsByUserId(sessionDoc.user);
 };
+
+export const verifyEmail  = async (token:string) => {
+  try {
+    const userId = await verifyJWT(token);
+    const user = await userService.getUserById(userId);
+      if(!user) {
+        throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+      }
+    const session = await sessionService.getSessionRecordByUserId(user.id, tokenTypes.VERIFY_EMAIL );
+      if(!session) {
+        await sessionService.deleteSessionRecordsByUserId(user.id);
+        throw ClientError.BadRequest('didnt delete session records');
+      } else {
+        try {
+          await userService.updateUserById(user.id, {isEmailVerified: true });
+        } catch (err) {
+          throw ClientError.BadRequest('did not update user')
+        }
+       try {
+        await sessionService.deleteSessionRecord(user.id, tokenTypes.VERIFY_EMAIL);
+       } catch(err) {
+        throw ClientError.BadRequest('didn not delete verifiy email record')
+       }
+       
+      }
+      
+    } catch (error) {
+  
+    throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+   }
+
+}
 
 
 

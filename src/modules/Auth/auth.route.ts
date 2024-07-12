@@ -7,13 +7,18 @@ const router = express.Router();
 
 router
   .route("/register")
-  .post(validateInput(authValidation.register), authController.register);
+  //.post(validateInput(authValidation.register), authController.register);
+  .post(authController.register);
 router
   .route("/login")
-  .post(validateInput(authValidation.login), authController.login);
+  //.post(validateInput(authValidation.login), authController.login);
+  .post( authController.login);
   router
   .route("/refresh-tokens")
   .post(authController.refreshAuthTokens)
+  router
+  .route("/verify-email")
+  .post(authController.verifyEmail)
 router
   .route("/logout")
   .post(validateInput(authValidation.logout), authController.logout)

@@ -19,6 +19,7 @@ export interface IUser extends Document {
   password: string;
   role: string;
   timestamps: string;
+  isEmailVerified: boolean;
 }
 
 interface IUserMethods {
@@ -57,6 +58,11 @@ const schema = new Schema<IUser, UserModel, IUserMethods>({
     type: String, 
     default: 'user'
    },
+   isEmailVerified: {
+    type: Boolean,
+    default: false,
+    private:true,
+   }
 
 
 },  
@@ -72,6 +78,7 @@ const schema = new Schema<IUser, UserModel, IUserMethods>({
 );
 
 schema.plugin(toJSON);
+//@ts-ignore
 schema.plugin(paginate);
 
 schema.statics.searchableFields = function () {
@@ -82,10 +89,7 @@ schema.statics.searchableFields = function () {
   const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
   return !!user;
 };
-// schema.methods.isPasswordMatch = async function (password: string) {
-//   const userPassword = this.password;
-//   return bcrypt.compare(password, userPassword);
-// };
+
 
 schema.method('isPasswordMatch', function isPasswordMatch(password: string): Promise<boolean> {
   const userPassword = this.password;
