@@ -36,18 +36,21 @@ task-controller
 app crashes and you get this console message ReferenceError: apple is not defined
 
 
-Operational Error Handling:
+<ins>Operational Error Handling:</ins>
 
-1. No record in DB with no error handling
+**<ins>Scenario</ins>** The client requests a record from the DB 
+
+
+**A. With no error handling**
 
 const getTask = async (req, res) => {
     const task = await taskService.getTaskById(req.params.taskId);
     res.send(task);
 };
 
--app crashes and you get some huge mongo error object
+Result: app crashes and you get some huge mongo error object
 
-2. Wrap controller in try/catch
+**B. Wrap controller in try/catch**
 
 const getTask = async (req, res, next) => {
   try {
@@ -63,7 +66,7 @@ Message: CastError: Cast to ObjectId failed for value "{{deleted}}" (type string
 AND---the server isnt completely crashed
 
 
-With No Error Handling when console.log a null task value the app will completey crash, on the client you will not get any http response code and the error will simplete be an axios error called network error
+With No Error Handling when you attempt to console.log a null task value the app will completey crash, on the client you will not get any http response code and the error will simply be an axios error called network error
 
 From axios: message: "Network Error", name: "AxiosError", code: "ERR_NETWORK"
 
@@ -341,4 +344,37 @@ This implementation has these consistencies:
     The value the promise resolves with is always an actual successful value.
     There's no .then() handler that does nothing useful.
 
+
+**Errors vs Exceptions**
+
+Two main types of Errors:
+
+    1. Compile-time errors: These occur when the code is being compiled. Examples:
+        Syntax errors: Mistakes in the code's structure, such as missing semicolons, incorrect brackets, or misspelled keywords.
+        Type errors: Mismatched data types or misuse of types, often caught by statically typed languages like Java or C++.
+
+    2. Runtime errors: These occur during the execution of the program. Examples:
+        Logic errors: The program compiles and runs but produces incorrect results due to flawed logic.
+        Runtime exceptions: These are a subset of runtime errors that are usually more severe, such as division by zero, null pointer dereferences, or array index out of bounds.
+
+            a. Exceptions
+
+                **Exceptions are a specific type of runtime error** that can be anticipated and managed within the code. Exceptions are used to handle error conditions gracefully and prevent the program from crashing. The key characteristics of exceptions include:  Exception handling: Languages provide constructs (try, catch, finally) to catch and manage exceptions, allowing the program to continue running or shut down gracefully.
+
+                 Types of exceptions: Exceptions can be built-in (e.g., NullPointerException in Java, IndexError in Python) or user-defined (custom exceptions created by developers for specific error conditions).
+                Propagation: Exceptions can propagate up the call stack if not caught, potentially leading to higher-level error handling or termination of the program.
+
+Language-specific Differences
+
+Different programming languages handle errors and exceptions in various ways:
+
+    Java: Provides robust exception handling with checked (must be declared and handled) and unchecked (runtime) exceptions. Errors in Java are usually more severe and not meant to be caught (e.g., OutOfMemoryError).
+
+    Python: Uses exceptions extensively for error handling. Almost all errors in Python are exceptions (try and except blocks are used to handle them). Python does not differentiate between checked and unchecked exceptions.
+
+    C++: Supports exceptions but also allows traditional error handling via return codes. Exceptions in C++ are not as frequently used as in Java or Python.
+
+    JavaScript: Uses try-catch for exception handling. JavaScript errors can be objects derived from the Error class (e.g., TypeError, ReferenceError).
+
+    Go: Does not use exceptions but prefers error return values, which must be explicitly checked by the programmer. This approach promotes handling errors where they occur rather than propagating exceptions.
 
