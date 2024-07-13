@@ -4,7 +4,8 @@ import ClientError from '../../config/error/ClientError.js';
 import * as sessionService from './Session/session.service.js';
 import Session from './Session/session.model.js';
 import * as userService from '../User/user.service.js'
-import { verifyJWT, generateAuthTokens, IAuthTokens } from './helpers/jwt.helper.js';
+import { verifyJWT, generateAuthTokens, IAuthTokens, generatePasswordResetToken } from './helpers/jwt.helper.js';
+import * as emailHelper from './helpers/email.helper.js';
 import tokenTypes from './Session/token.types.js';
 
 
@@ -15,7 +16,7 @@ interface IRefreshedAuth {
 }
 
 
-export const login = async (email: string, password: string): Promise<IUser> => {
+const login = async (email: string, password: string): Promise<IUser> => {
   const user = await userService.getUserByEmail(email);
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ClientError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
@@ -23,7 +24,7 @@ export const login = async (email: string, password: string): Promise<IUser> => 
   return user;
 };
 
-export const refreshAuth = async (token: string): Promise <IRefreshedAuth> => {
+ const refreshAuth = async (token: string): Promise <IRefreshedAuth> => {
   try {
   const userId = await verifyJWT(token);
   const user = await userService.getUserById(userId);
@@ -45,14 +46,14 @@ export const refreshAuth = async (token: string): Promise <IRefreshedAuth> => {
 
 }
 
-export const logout = async (refreshToken:string) => {
+const logout = async (refreshToken:string) => {
   if (!refreshToken) return;
   const sessionDoc = await Session.findOne({ token: refreshToken, valid: true, tokenType: tokenTypes.REFRESH });
   if (!sessionDoc) return;
   return sessionService.deleteSessionRecordsByUserId(sessionDoc.user);
 };
 
-export const verifyEmail  = async (token:string) => {
+const verifyEmail  = async (token:string) => {
   try {
     const userId = await verifyJWT(token);
     const user = await userService.getUserById(userId);
@@ -62,28 +63,41 @@ export const verifyEmail  = async (token:string) => {
     const session = await sessionService.getSessionRecordByUserId(user.id, tokenTypes.VERIFY_EMAIL );
       if(!session) {
         await sessionService.deleteSessionRecordsByUserId(user.id);
-        throw ClientError.BadRequest('didnt delete session records');
+        throw ClientError.BadRequest('Please authenticate');
       } else {
         try {
           await userService.updateUserById(user.id, {isEmailVerified: true });
         } catch (err) {
-          throw ClientError.BadRequest('did not update user')
+          throw ClientError.BadRequest('Please authenticate');
         }
        try {
         await sessionService.deleteSessionRecord(user.id, tokenTypes.VERIFY_EMAIL);
        } catch(err) {
-        throw ClientError.BadRequest('didn not delete verifiy email record')
+        throw ClientError.BadRequest('Please authenticate')
        }
-       
       }
       
     } catch (error) {
-  
     throw new ClientError(httpStatus.UNAUTHORIZED, 'Please authenticate');
    }
-
 }
 
 
+const sendForgotPasswordEmail = async (email: string) => {
+const user = await userService.getUserByEmail(email);
+if(user) {
+  const token = await generatePasswordResetToken(user.id);
+  await emailHelper.sendResetPasswordEmail(user.email, token);
+  return;
+}
+};
+
+export {
+  login,
+  logout,
+  verifyEmail,
+  refreshAuth,
+  sendForgotPasswordEmail
+};
 
 

@@ -24,7 +24,6 @@ const login = catchAsync(async (req: Request, res: Response) => {
     throw ClientError.Unauthorized("Invalid credentials");
   }
   const tokens = await generateAuthTokens(user._id)
-  console.log('token', tokens)
   await setCookieToken(res, tokens.refreshToken)
   res.send({ user, tokens });
   });
@@ -57,8 +56,14 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
     throw ClientError.BadRequest('Invalid credentials');
   }
   res.status(httpStatus.OK).send('ok');
-
 });
+
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  await authService.sendForgotPasswordEmail(email);
+  res.status(httpStatus.OK).send('ok');
+});
+
 
 
 
@@ -69,4 +74,5 @@ export {
   logout,
   revokeAuthSession,
   verifyEmail,
+  forgotPassword
 };

@@ -22,16 +22,11 @@ export interface IAuthTokens {
 }
 
 
-export const generateJWT = (payload: jsonPayload, expiration: string) => {
+const generateJWT = (payload: jsonPayload, expiration: string) => {
 return jwt.sign(payload, config.jwt.secret, {expiresIn: expiration});
 }
 
-
-// export const verifyJWT = async (token:string)  => {
-// return jwt.verify(token, config.jwt.secret);
-//  };
-
- export const verifyJWT = async (token:string)  => {
+const verifyJWT = async (token:string)  => {
   try {
    const payload = await  jwt.verify(token, config.jwt.secret);
         if(!payload.sub || typeof payload.sub !== 'string') {
@@ -43,7 +38,7 @@ return jwt.sign(payload, config.jwt.secret, {expiresIn: expiration});
   }
  };
 
- export const generateAuthTokens = async (userId: string): Promise<IAuthTokens> => {
+ const generateAuthTokens = async (userId: string): Promise<IAuthTokens> => {
   await sessionService.deleteSessionRecordsByUserId(userId);
   const accessToken = generateJWT({ sub: userId, tokenType: tokenTypes.ACCESS}, config.jwt.accessTokenExpiration);
   const access = calculateExpiration(config.jwt.accessTokenExpiration);
@@ -57,10 +52,17 @@ return jwt.sign(payload, config.jwt.secret, {expiresIn: expiration});
 };
 
 
-export const generateEmailVerificationToken = async (userId: string) => {
+const generateEmailVerificationToken = async (userId: string) => {
   const emailToken = generateJWT({ sub: userId, tokenType: tokenTypes.VERIFY_EMAIL}, config.jwt.accessTokenExpiration);
   await sessionService.createSessionRecord({ user: userId, tokenType: tokenTypes.VERIFY_EMAIL, token: emailToken });
   return emailToken;
+}
+
+
+const generatePasswordResetToken = async (userId: string) => {
+  const passwordResetToken = generateJWT({ sub: userId, tokenType: tokenTypes.RESET_PASSWORD}, config.jwt.accessTokenExpiration);
+  await sessionService.createSessionRecord({ user: userId, tokenType: tokenTypes.VERIFY_EMAIL, token: passwordResetToken });
+  return passwordResetToken;
 }
 
 
@@ -78,7 +80,13 @@ function calculateExpiration(expires:string) {
 
 
 
+export {
+  verifyJWT,
+  generateAuthTokens,
+  generateEmailVerificationToken,
+  generatePasswordResetToken
 
+}
 
  
 

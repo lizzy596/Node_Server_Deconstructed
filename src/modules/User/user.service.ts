@@ -6,9 +6,10 @@ import ClientError from "../../config/error/ClientError.js";
 //@ts-ignore
 export const createUser = async (userBody: any): Promise<IUser> => {
   //@ts-ignore
-if(await User.isEmailTaken(userBody)) {
+if(await User.isEmailTaken(userBody.email)) {
   throw ClientError.BadRequest('Email is already taken');
 }
+return User.create(userBody);
   
 };
 

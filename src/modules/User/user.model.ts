@@ -19,7 +19,7 @@ export interface IUserMethods {
   isPasswordMatch(password: string): boolean;
 }
 
-export interface UserModel extends Model<IUser, {}, IUserMethods> {
+ export interface UserModel extends Model<IUser, {}, IUserMethods> {
   createFully(): Promise<HydratedDocument<IUser, IUserMethods>>;
 }
 const schema = new Schema<IUser, UserModel, IUserMethods>({
