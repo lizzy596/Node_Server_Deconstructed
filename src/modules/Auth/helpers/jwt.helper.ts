@@ -61,7 +61,7 @@ const generateEmailVerificationToken = async (userId: string) => {
 
 const generatePasswordResetToken = async (userId: string) => {
   const passwordResetToken = generateJWT({ sub: userId, tokenType: tokenTypes.RESET_PASSWORD}, config.jwt.accessTokenExpiration);
-  await sessionService.createSessionRecord({ user: userId, tokenType: tokenTypes.VERIFY_EMAIL, token: passwordResetToken });
+  await sessionService.createSessionRecord({ user: userId, tokenType: tokenTypes.RESET_PASSWORD, token: passwordResetToken });
   return passwordResetToken;
 }
 

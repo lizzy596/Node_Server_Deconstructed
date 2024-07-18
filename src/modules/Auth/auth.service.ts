@@ -92,12 +92,34 @@ if(user) {
 }
 };
 
+const resetUserPassword = async (token:string, password: string) => {
+  const userId = await verifyJWT(token);
+  const resetPasswordSession = await sessionService.getSessionRecordByUserId(userId, tokenTypes.RESET_PASSWORD);
+  if(!resetPasswordSession) {
+    await sessionService.deleteSessionRecordsByUserId(userId);
+    throw ClientError.BadRequest('Please authenticate');
+  }
+  const user =  await userService.updateUserById(userId, password);
+  if(!user) {
+    throw ClientError.BadRequest('Please authenticate');
+  }
+  try {
+    await sessionService.deleteSessionRecord(userId, tokenTypes.RESET_PASSWORD);
+  } catch(err) {
+    throw ClientError.BadRequest('Please authenticate')
+  }
+ 
+  return user;
+  
+  };
+
 export {
   login,
   logout,
   verifyEmail,
   refreshAuth,
-  sendForgotPasswordEmail
+  sendForgotPasswordEmail,
+  resetUserPassword
 };
 
 
