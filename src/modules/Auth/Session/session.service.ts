@@ -1,9 +1,7 @@
 import Session, { ISession} from "./session.model.js";
 
 
-
-
- const createSessionRecord = async (sessionBody: ISession): Promise<ISession> => {
+  const createSessionRecord = async (sessionBody: ISession): Promise<ISession> => {
   return Session.create(sessionBody);
 };
 

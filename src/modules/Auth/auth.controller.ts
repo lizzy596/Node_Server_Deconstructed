@@ -37,7 +37,7 @@ res.send(refreshed);
 const logout = catchAsync(async (req:Request, res:Response) => {
   const token = await authService.logout(req.cookies[config.jwt.refreshCookieName] || req.body?.refreshToken);
   if (!token) {
-    throw new ClientError(httpStatus.NOT_FOUND, 'No token found');
+    throw ClientError.NotFound('No token found');
   }
   clearCookieToken(res);
   res.status(httpStatus.NO_CONTENT).send();
@@ -70,7 +70,7 @@ const resetUserPassword = catchAsync(async (req: Request, res: Response) => {
   res.status(httpStatus.OK).send();
 });
 
-
+ 
 
 
 export {

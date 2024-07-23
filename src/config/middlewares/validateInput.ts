@@ -27,7 +27,6 @@ const validateInput = (schema : Record<string,any>) => (req: Request, _res: Resp
   const [error] = validate(formattedPayload, schema);
   if (error) {
     if (error instanceof StructError) {
-      console.log(error);
       next(ClientError.BadRequest(generateValidationMessage(error?.message, error?.key)));
     } else {
       next(error);

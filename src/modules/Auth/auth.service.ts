@@ -19,7 +19,7 @@ interface IRefreshedAuth {
 const login = async (email: string, password: string): Promise<IUser> => {
   const user = await userService.getUserByEmail(email);
   if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ClientError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+    throw ClientError.Unauthorized('Incorrect email or password');
   }
   return user;
 };
@@ -94,12 +94,13 @@ if(user) {
 
 const resetUserPassword = async (token:string, password: string) => {
   const userId = await verifyJWT(token);
-  const resetPasswordSession = await sessionService.getSessionRecordByUserId(userId, tokenTypes.RESET_PASSWORD);
-  if(!resetPasswordSession) {
+  const userUpdate = {password};
+  const resetPasswordSessionRecord = await sessionService.getSessionRecordByUserId(userId, tokenTypes.RESET_PASSWORD);
+  if(!resetPasswordSessionRecord) {
     await sessionService.deleteSessionRecordsByUserId(userId);
     throw ClientError.BadRequest('Please authenticate');
   }
-  const user =  await userService.updateUserById(userId, password);
+  const user =  await userService.updateUserById(userId, userUpdate);
   if(!user) {
     throw ClientError.BadRequest('Please authenticate');
   }
