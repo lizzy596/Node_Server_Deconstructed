@@ -14,16 +14,11 @@
 * **Implement roles-based permissions and implement a route on the client application that requires elevated privileges to access**
 
 
-
-
-
 ### **Introduction**
-
-<span style="font-size:1.2em;">A RESTful request by definition stateless. The server does not remember anything about the requester between requests. In practice there are many occasions where information about the requester needs to be persisted between requests and much debate and opinion exists regarding implementing this statefulness securely and effectively.</span>
-
 
 <span style="font-sze:1.2em;"><ins>**Authentication**:</ins> </span>
  the process of verifying that some entity is what it claims to be (401 unauthorized)
+
 Authentication can be based on one or more of the following:
 
 * Something the user knows (password, PIN, pattern, etc.)
@@ -32,89 +27,200 @@ Authentication can be based on one or more of the following:
 
 <span style="font-sze:1.2em;"><ins>**Authorization**:</ins> the process of determining to which resources you have access (403 forbidden)</span>
 
+<span style="font-size:1.2em;">A RESTful request by definition stateless, i.e. each request must contain all of the information necessary to be understood by the server, rather than be dependent on the server remembering prior requests. . The server does not remember anything about the requester between requests.  
 
-## **Password Security Considerations**
+**Each request from client to server must contain all of the information necessary to understand the request, and cannot take advantage of any stored context on the server. Session state is therefore kept entirely on the client**
 
-**Hashing:** One-way Cryptographic hash functions make it mathematically difficult to derive the **input** value from the **output** value.
+In practice there are many occasions where information about the requester needs to be persisted between requests and much debate and opinion exists regarding implementing this statefulness securely and effectively.</span>
 
-Password-> Hash -> garbled hexidecimal -> user table
+Traditional web applications use remote sessions. In this approach, the application state is kept entirely on the server. 
 
-**Salting:** adds random non-obvious words to passwords, helps keep easy to guess passwords secure.
+The remote session style is a variant of client-server that attempts to minimize the complexity, or maximize the reuse, of the client components rather than the server component. Each client initiates a session on the server and then invokes a series of services on the server, finally exiting the session. Application state is kept entirely on the server.The advantages of the remote session style are that it is easier to centrally maintain the interface at the server, reducing concerns about inconsistencies in deployed clients when functionality is extended, and improves efficiency if the interactions make use of extended session context on the server. The disadvantages are that it reduces scalability of the server, due to the stored application state, and reduces visibility of interactions, since a monitor would have to know the complete state of the server
 
-We salt the password and then hash it. Rendering rainbow tables (tables of common passwords) unusable.
-
-**HTTPs** ensures paswords are not sent as plaintext over the wire.
-
+The stateless constraint induces the properties of visibility, reliability, and scalability: Visibility is improved because a monitoring system does not have to look beyond a single request datum in order to determine the full nature of the request. Reliability is improved because it eases the task of recovering from partial failures. Scalability is improved because not having to store state between requests allows the server component to quickly free resources, and further simplifies implementation because the server doesn't have to manage resource usage across requests.
 
 
-## **Maintaining State Between Requests**
+### **<ins>Authentication</ins>**
 
 
-### **Cookies**
+**Maintaining State Between Requests**
+
+If the client requests protected resources that require authentication, every request must contain all necessary data to be properly authenticated/authorized. And authentication data should belong to the standard HTTP Authorization header.
+
+   The Authorization header field allows a user agent to authenticate itself with an origin server -- usually, but not necessarily, after receiving a 401 (Unauthorized) response. Its value consists of credentials containing the authentication information of the user agent for the realm of the resource being requested.
+
+**The name of this HTTP header is unfortunate because it carries authentication instead of authorization data.**
+
+For authentication, you could use the Basic HTTP Authentication scheme, which transmits credentials as username and password pairs, encoded using Base64:
+
+Authorization: Basic <credentials>
+
+If you don't want to send the username and password in each request, the username and password could be exchanged for a token (such as JWT) that is sent in each request. JWT can contain the username, an expiration date and any other metadata that may be relevant for your application:
+
+Authorization: Bearer <token>
+
+
+#### **<ins>Cookies</ins>**
 
 A Cookie is a simple string of text that is sent/set by the server and stored within the client's browser storage. It is then sent back to the server by the client on each subsequent request. They were originally created to allow users to store items for potential purchase in a 'virtual' shopping cart.
 
-There are two major types of cookies. Session and Persistent. Cookies are session cookies if they do not specify the Expires or Max-Age attribute. Cookies can be used for authentication, cookies can also be used to track visits from users, including the products they viewed, helping them suggest other products that may be of interest. First-party cookies come from directly from the website you are visiting. Third-party cookies are generated by different websites than the one the user is currently surfing usually because they are linked to ads on the page.
+There are two major types of cookies. Session and Persistent. Cookies are session cookies if they do not specify the Expires or Max-Age attribute. Cookies can be used for authentication, cookies can also be used to track visits from users, including the products they viewed, helping them suggest other products that may be of interest. <ins>First-Party cookies</ins> come from directly from the website you are visiting. <ins>Third-Party cookies</ins> are generated by different websites than the one the user is currently surfing usually because they are linked to ads on the page.
 
-Some of the common options available when setting cookies include:
+Any cookie that does not have an expiration set is considered a session cookie by the browser and deleted when the browser quits. As a result, even though the old session file may remain on the server, it is no longer accessible once the associated cookie is no longer being sent back by the browser.
 
-**httpOnly:** (boolean) determines whether cookies are accessible through javascript. (i.e. whether you can access the cookie and its content via the Document.cookie property). Setting this flag to true protects against **XSS**
-**Max-Age:**(number) number of seconds until the cookie expires (zero or negative number mean the cookie expires immediately).
-**Partioned:**keeps cookies in a partioned storage area, this is being required by some browsers, basically its restricting third-party cookies from tracking user info thats not relevant to them.
-**Path:** Indicates the path that must exist in the requested URL for the browser to send the Cookie header.
-**SameSite:**(strict, lax, none) Controls whether or not a cookie is sent with cross-site requests, providing some protection against **CSRF** cross-site request forgery attacks 
-**Secure:**Indicates that the cookie is sent to the server only when a request is made with the **https**: scheme (except on localhost), and therefore, is more resistant to **man-in-the-middle** attacks.
+*A cookie is stored in the browser and then sent back to the target server with every request to that server.*
 
 
+**Common options for setting cookies:**
 
 
-### **Sessions**
+*Improper use of HTTP cookies can render an application to several session management vulnerabilities. Some flags can be set for each cookie to prevent these kinds of attacks. httpOnly, Secure and SameSite flags are very important for session cookies. httpOnly flag prevents the cookie from being accessed by client-side JavaScript. This is an effective counter-measure for XSS attacks. Secure flag lets the cookie to be sent only if the communication is over HTTPS. SameSite flag can prevent cookies from being sent in cross-site requests that helps protect against Cross-Site Request Forgery (CSRF) attacks. Apart from these, there are other flags like domain, path and expires. Setting these flags appropriately is encouraged, but they are mostly related to cookie scope not the cookie security.*
 
-Unlike a typical cookie, which stores data within client-side storage, a session is used to store relevant client information server-side. Only a small bit of information (e.g. session id or opaque token i.e.  a random unique string of characters issued by the authorization server) is stored on the client, and that id is sent back to the server on every subsequent request and is used to identify the given session and retrieve information. Session information doesn't need to be stored in a DB, but rather it needs to be persisted between requests (i.e. you can use an in-memory data store like a redis caching layer). Each user is identified by a session ID. This is an example of an opaque token (no third party can extract data out of the session and only the issuer or server can map back to relevant data). Stored in server-memory (filesystem), cache (redis), or DB. 
+* **httpOnly:** (boolean) determines whether cookies are accessible through javascript. (i.e. whether you can access the cookie and its content via the Document.cookie property). Setting this flag to true protects against **<ins>XSS</ins>** attacks.
 
+* **Max-Age:**(number) number of seconds until the cookie expires (zero or negative number mean the cookie expires immediately).
 
+* **Partioned:**keeps cookies in a partioned storage area, this is being required by some browsers, basically its restricting third-party cookies from tracking user info thats not relevant to them.
 
+* **Path:** Indicates the path that must exist in the requested URL for the browser to send the Cookie header.
 
+* **SameSite:**(strict, lax, none) Controls whether or not a cookie is sent with cross-site requests, providing some protection against **<ins>CSRF</ins>** cross-site request forgery attacks 
 
-The JWT is safe from just being modified because it is cryptographically signed by the server. It can’t be altered. But, it is vulnerable to attack if you’re not careful where you store it. For instance if you store it in localStorage or a JS cookie it can be accessed via XSS attack. It’s like leaving your house key outside under the mat.
+* **Secure:** Indicates that the cookie is sent to the server only when a request is made with the **https**: scheme (except on localhost), and therefore, is more resistant to **<ins>man-in-the-middle</ins>** attacks.
 
-Session Based Authentication Workflow:
+Cookies are not totally secure even when security mesaures are taken and they are of limited size so putting sensitive information within them is not ideal. A more common way to use them is the allow the cookie to store a reference to some sort of session id, which can 
+then be looked up server-side. The session id is not sensitive and the sensitive information is retained by the server. Whoever sets a cookie decides how long they want it to last before it "expires".
 
-When user logins in:
-When user logs out:
-
-
-Session cookies are removed when the client shuts down.
-
-
-
-### **JSON Web Tokens**
-
-JWTs are a compact and self-contained way for securely transmitting information between parties as a JSON object.  While the information contained within the JWT payload can be encrypted, the real value of the token is the ability to verify the
-integrity of the token via its digital signature. In other words you can know whether or not your server is in fact the one which issued and signed the token. The server does not have to store any session data in memory. One of the criticisms
- of JWTs is that they are not easily expirable, as they are self-contained and inherently encapsulate their validity or not, thus the token is valid until it expires. The way this limitation is mitigated is by having a short and long expiry token and by keeping token records in the database whose validity can be revoked and always cross-checking the jwt against the token record in the database (although critics will say this undermines one of the major value adds of jwts, which is that you can avoid a DB lookup because the of self-contained nature of the token). JWTs are just a way to perform user authentication with the backend without the backend having to make a database query with every web hit/api call. That's all. That's what they're designed to do, and they work great for it. The issue is not deleting the cookie. The issue is that the JWT can still be used as a valid session unless you have some sort of blocklist. Once you introduce a blocklist, you might as well ditch the JWT and use some opaque token stored in a table.
- 
+(Supposedly adding a max-age to cookies will prevent ios apps from deleting them before the set expiry date)
 
 
-**Token Based Authentication Workflow:**
+Note: localStorage should never be used for storing any sensitive data; if you absolutely must use something other than cookies, use at least only sessionStorage instead, which is only available to that window/tab until the window is closed. A single XSS vulnerability can be used to steal all the information from data inside localStorage, also it persists when you close the tab. Cookies are stored encrypted on the client computer, unlike data in local storage.
 
-1. Upon a successful registration or login two jwt tokens are generated, a short-lived access token and longer-lived refresh token, they are then returned in the response. 
-2. The access token is stored in memory on both web and mobile apps and the refresh token is stored in secure storage on the device for mobile apps and in an http-only cookie on web apps (but what about cookies that will stored on mobile apps?--even though cookies can be set on mobile devices, ios tends to destroy cookies before the time the developer sets (this is potentially resolved by setting a maxAge on the cookie)). 
+
+
+#### **<ins>Sessions</ins>**
+
+Unlike a typical cookie, which stores data within client-side storage, a session is used to store relevant client information server-side. Only a small non-sensitive bit of information (e.g. session id or opaque token i.e.  a random unique string of characters issued by the authorization server) is stored on the client, and that id is sent back to the server on every subsequent request and is used to identify the given session and retrieve information often from a session object. Session information doesn't need to be stored in a DB, but rather it needs to be persisted between requests (i.e. you can use an in-memory data store like a redis caching layer). Each user is identified by a session ID. This is an example of an opaque token (no third party can extract data out of the session and only the issuer or server can map back to relevant data). Stored in server-memory (filesystem), cache (redis), or DB. 
+
+Note, **sessions don't have to use cookies**. They can also put a session id in the URL itself and that is occasionally used, but isn't very popular for a variety of reasons. 
+
+**Sessions are more traditional and have a lot of advocates among older developers who view them as more straightforward to implement and more controllable. Since sessions are not self-contained they can be revoked quickly and granularly, which is not possible with traditionally used JWTs.**
+
+As far as authenticating a user with a normal username and password in your app, and having a session ID passed with each request; in  general best practice can be summed up as:
+
+-At least 128 bits (16 bytes, 22 printable Base64 characters) long.
+-Generated with a cryptographically secure PRNG.
+-Does not represent anything except the session ID (don't include the username).
+-Before authenticating, switch to TLS. Never use an authenticated session in non-TLS.
+-Cookies may not apply to you, unless you're using a browser, but if they do apply, must have the Secure, SameSite, and HttpOnly attributes with properly configured (and not too permissive) domain and path attributes.
+-Recycled on privilege level change (login, logout, changing password).
+-Idle timeouts and maximum timeouts.
+-Since you are writing a mobile app, you have some more assurances that many web developers don't have. You do not have to rely on cookies for storing your session IDs, so you can get away with having two tokens; a short term session token for your API access, perhaps valid for a few hours, and the other (a "refresh token") to request your short term tokens. This refresh token should be much higher entropy than a session token. In any case, 256 bit tokens will protect against brute force attempts until the heat death of the universe.
+
+You can also use this refresh token as a shared secret, rather than a simple ID like the session ID is. When negotiating a new session ID, you would send some random bytes to the client. They will append these bytes to their refresh token, and calculate a hash based on that, and send the result back. You then compare what they sent back with what your server expects (after doing the same hashing of the refresh token and your nonce **nonces protect against replay attacks**). This proves that the client has the correct refresh token, without sending the refresh token over the network.
+
+With this system, an attacker who performed a successful Man-in-the-Middle attack can only hijack a session for as long as you haven't recycled your session IDs, and users will not need to re-authenticate constantly, for as long as the refresh tokens are valid.
+
+**<ins>Session-based Workflows</ins>**
+
+* **<ins>Login Workflow</ins>**
+
+* **<ins>Refresh Auth Workflow</ins>**
+
+* **<ins>Logout Workflow</ins>**
+
+* **<ins>Revocation Considerations</ins>**
+
+
+
+
+
+#### **<ins>JSON Web Tokens</ins>**
+
+JWTs are base64 encoded. They have 3 parts: header, body, signature
+
+A signed JWT can easily be converted back to plain text without a key. The signature only provides a way to verify that the token was issued by someone who knows the secret. Don't put sensitive information within the token.
+
+
+JWTs are a compact and self-contained way for securely transmitting information between parties as a JSON object.  While the information contained within the JWT payload can be encrypted, the real value of the token is the ability to verify the integrity of the token via its digital signature. In other words you can know whether or not your server is in fact the one which issued and signed the token. The server does not have to store any session data in memory. One of the criticisms of JWTs is that they are not easily expirable/revokable,presenting a security concern. As they are self-contained and inherently encapsulate their validity or not, the token is valid until it expires. The way this limitation is mitigated is by having a short and long expiry token and by keeping token records in the database whose validity can be revoked and always cross-checking the jwt against the token record in the database (although critics will say this undermines one of the major value adds of jwts, which is that you can avoid a DB lookup because the of self-contained nature of the token). 
+
+**The Big JWT Drawback**
+
+JWTs can't be invalidated on-demand. so you cannot implement many security measures both automated (e.g. heuristic-based lockouts like fail2ban for anti-SPAM/DoS/scraping) and feature-based (e.g. logout another session). Short-lived JWTs require client to refresh, which adds complexity. This means you can't implement a secure logout as there is no way to expire already issued tokens. You also can't implement idle timeout for the same reason. One solution is to keep a blacklist, but that introduces state. If your clients only interact with your service via a browser, I strongly recommend using a cookie-based session management solution. I also compiled a list authentication methods currently widely used on the web.For the authentication service, in order to invalidate tokens, I like to use an in-memory cache layer (redis in my case) as a JWT blacklist/ban-list in front, depending on some criterias: (I know it breaks the RESTful philosophy, but the stored documents are really short-lived, as I blacklist for their remaining time-to-live -ttl claim-)For long-lived JWTs, attacker can stash up JWTs for later.
+A second issue is ‘logging out’. With traditional sessions, you can just remove the session token from your session storage, which is effectively enough to ‘invalidate’ the session.
+    -The tokens are made very short lived. For example, 5 minutes. Before the 5 minutes are over, we generate a new one. (often using a separate refresh token).
+    -Maintain a system that has a list of recently expired tokens.
+    -There is no server-driven log out, and the assumption is that the client can delete their own tokens.
+Good systems will typically use the first two. An important thing to point out is, in order to support logout, you’ll likely still need a centralized storage mechanism (for refresh tokens, revocation lists or both), which is the very thing that JWT were supposed to ‘solve’.
+
+Thus we effectively sessionize our refresh token JWT by creating a refresh token record, which serves as the actual source of truth as to the tokens validity, because we are always checking that record to determine whether our token is good regardless of whether the token is successfully validated or not. You could also have somesort of blocklist of bad tokens 
+
+ You either forego revocation, or you need to have infrastructure in place that be way more complex than simply adopting a session store and opaque tokens.
+
+Supporters will say that revoking tokens is important for security, but rare. Realistically this list is small and easily fits into memory. This largely solves the logout issue.
+
+A last issue with JWT is that they are relatively big, and when used in cookies it adds a lot of per-request overhead.
+
+And for whitelisting or blacklisting tokens, you may use redis(instead of db), for lookup.
+
+JWTs are in end like passwords. It's best to treat them like temporary password + some arbitrary metadata.
+
+The real use of JWTs is when you want third parties to be able to sign their own API requests, that your API will accept using the very same machinery by which it accepts your first-party-client API requests. If you use JWT, you can just pass the third party a private JWT signing key to use, add the corresponding public key to your validation set for JWT decode on your backend, and everything "just works."At some point, if your user base grows, the database becomes a bottleneck and you'll need to reduce the amount of database requests.One way of doing that is removing session requests and authenticating via JWT.
+This is especially handy in a distributed system. 
+
+ JWTs are handy for decoupling services, however they really shouldn't be the default and I'd recommend starting with server-side sessions. Then JWTs would be used if that is not enough and or if the architecture gets complex enough to warrant separating services from the same session database. Sites that do not need security/admin/etc functionalities should use simple cookies for state. Sites that need more complex login/admin/etc functionalities should use server-side sessions. Sites that need complex, decoupled architectures should consider using JWTs, albeit even then I'd recommend some sort of a central authentication server and ping-ponging between that and the services relying on auth.
+
+
+
+For authentication purposes never trust anything you did not issue and cannot verify.  JWT allows you to verify that the token was generated by you. You can then trust (to the best of your knowledge) the data in the token. It’s still prone to being stolen, intercepted, etc. you cannot solve all the security problems yourself. You can’t manage the token after it leaves your server.
+
+It may not be required to send the expired access token alongside a refresh token but I like to do it. Usually the request layer is already configured to do it automatically so it’s additional overhead/work (not talking about performance here) to remember this one request needs it removed. It then one additional verification you can perform and if you store the tokens apart in some way then it’s not as easy to nab an access token and the refresh token (but always still possible). Does it solve a lot of issues? Probably not. But it doesn’t hurt anything.
+
+Refresh tokens let the user get a new access token. In a naive implementation (without rotation) I could use one refresh token and get as many access tokens as I want from it until it expires. That’s good but also bad. Which is where rotation comes into play. Each time a refresh token is submitted you issue a new one guaranteeing that any token is good only once. This means any compromised access token/refresh token combination is only valid until they both expire or the refresh token is used. If a token is replayed you can act on the potential that a user has had their session compromised.
+
+
+Issuing a new refresh token on each use and invalidate all credentials / log out the user when detecting refresh token reuse (what else could you do?) is a good idea, the latter is even in the standard.
+
+
+**General Token Based Authentication Workflow:**
+
+1. Upon a successful login two jwt tokens are generated, a short-lived access token and longer-lived refresh token, they are then returned in the response. 
+2. The access token is stored in memory on both web and mobile apps (we use rxjs in react and react native apps) and the refresh token is stored in secure storage on the device for mobile apps (mmkv) and in an http-only cookie on web apps (but what about cookies that will stored on mobile apps?--even though cookies can be set on mobile devices, ios tends to destroy cookies before the time the developer sets (this is potentially resolved by setting a maxAge on the cookie)). We continue to set the longer-lived refresh token, in non-volitile storage for our mobile apps using mmkv, the token is then grabbed from the req.body rather than the req.cookie.
 3. When the user attempts to access to a protected route, the access token accompanies the request in the request headers as a bearer token.
 4. The request then hits the auth middleware where the jwt is extracted from the header, its verified against the server held secret to determine if the token  was indeed issued by the server and is still valid the token payload is decoded and if a valid user is found in the database with appropriate permissions to access a given resource, that user id is added to the request object for use during the request life cycle. 
-5.When the access token expires a timer expires on the client side, triggering a call to the server with the refresh token in contained in a cookie or in the request body, if the refresh token is valid and the refresh token's database record is still valid, a new access and refresh token are issued. 
+5.When the access token is about to expires a timer expire on the client side, triggering a call to the server with the refresh token in contained in a cookie or in the request body, if the refresh token is valid and the refresh token's database record is still valid, a new access and refresh token are issued. 
 When user logs out:
 
 
-**When a user changes their password**
-If a user changes their password on any device, then revoke all their refresh tokens forcing them to log in again as soon as their access token expires. This does leave a 'window of uncertainty' but that's unavoidable without hitting a db every time.
+**<ins>Token-based Workflows</ins>**
+
+* **<ins>Login Workflow</ins>**
+
+* **<ins>Refresh Auth Workflow</ins>**
+
+* **<ins>Logout Workflow</ins>**
+
+* **<ins>Revocation Considerations</ins>**
+
+
+#### **<ins>OAuth</ins>**
+
+Oauth is an authorization system, not an authentication system.
+
+(Open Authorization) is an open standard for access delegation commonly used as a way to grant websites or applications limited access to a user's information without exposing passwords. It enables third-party services to exchange tokens for access to specific resources, usually through an authorization server. If you have server side rendering, the Authorization Code Grant should be your go to, but at bare minimum, you SHOULD use the state parameter.  Typically, an access token provided by a third party (Google, Discord, Facebook, Twitter), should ideally not be exposed to your frontend. So usually what would happen is this:
+
+You redirect a user to a third party OAuth2 provider. They login. This sends a redirect where part of the URL contains a code. Your backend then uses this code to retrieve an access token (in the case where the redirect was to a frontend SPA, this posts the code to your backend).
+
+Your backend then uses that access token to request the users third-party profile, and any other information as per the specified scopes. You then use this information to identify that user within YOUR system, and you then provide them authentication inside of your system / application based on that information.  OAuth is intended to provide secure access to a resource by a third party. For example, there are applications that allow you to schedule posts to various social media platforms, such as Facebook and Twitter. These applications will store your posts then, at the scheduled time, make a post to that system on your behalf, without having your credentials.
+
+Another common use is, if you are a third party, such as an information scraping tool that is set up to look like a "What color pocket lint matches your auras" poll, such apps will be given some identifying information about you, such as your name and user ID (and possibly a LOT more, if you don't check the permissions carefully.) These provide a round-about identification system, that can sometimes stand in place of authorization, if you trust the OAuth provider. That is, there is no way to prevent this OAuth provider from lying to you about the identification; an admin for the provider could claim to be one of your users and you would have no way to know for certain, if you use their OAuth service as authentication.
+
+If you want to identify users of your mobile app, you could have a "Sign in with [social media platform]" option using OAuth. This can decrease some of the friction of signing in, compared to using a username and password. Just keep in mind that, in this case, you're not the one authenticating your users.
 
 
 
 
-
-
-**AUTHORIZATION**
+### **<ins>AUTHORIZATION</ins>**
 
 
 Authorization concerns which resources to which a given user has access. Some options for maintaining user permissions include:
@@ -129,665 +235,127 @@ Authorization concerns which resources to which a given user has access. Some op
 
 
 
+### **<ins>CORS</ins>**
 
+ CORS defines a way for client web applications that are loaded in one domain to interact with resources in a different domain. This is useful because complex applications often reference third-party APIs and resources in their client-side code. Imagine the site alice.com has some data that the site bob.com wants to access. This type of request traditionally wouldn’t be allowed under the browser’s same origin policy. However, by supporting CORS requests, alice.com can add a few special response headers that allows bob.com to access the data .When internet technologies were still new, cross-site request forgery (CSRF) issues happened. For example, the victim logged into their bank's application. Then they were tricked into loading an external website on a new browser tab. The external website then used the victim's cookie credentials and relayed data to the bank application while pretending to be the victim. Unauthorized users then had unintended access to the bank application.
 
-Sessions are good for managing authorization and as an added extra, unlike JWT, provide the ability to revoke the token or cookies priveledges at any given time. It's also easy to find session management frameworks that also provide some OpenID or OAuth functionality however sessions require more maintenance. In 2021 they introduced SameSite Lax/Strict into cookies. Using the same site, HTTP only, and secure options on your cookie. Will provide safety from XSS AND CSRF attacks.
+To prevent such CSRF issues, all browsers now implement the **same-origin policy.**
 
- You should almost always use sessions, because sessions can be revoked, JWTs (or any other type of stateless auth) cannot.
+**Today, browsers enforce that clients can only send requests to a resource with the same origin as the client's URL. The protocol, port, and hostname of the client's URL should all match the server it requests.**
 
-As for scaling, pretty much most systems will not reach the point where the session lookup is the biggest bottleneck in the system. 
+Consider the origin comparison for the below URLs with the client URL http://store.aws.com/dir/page.html.
 
- JWT’s are the industry standard for easily authenticating and authorizing user claims in a secure format. Sessions, cookies, and other similar temporary storage are for exactly that - temporary build up of user information, interactions, and other data that either you want to persist temporarily to reduce calls or for building up to persist to a db later on. 
+http://store.aws.com/dir2/new.html -> same origin -> only path differs
 
+https://store.aws.com/page.html -> different origin -> different protocol
 
-Session for any app that needs real security.
+http://store.aws.com:81/dir/page.html -> different origin -> different port
 
-JWT doesn't have invalidation mechanism, so you cannot implement many security measures both automated (e.g. heuristic-based lockouts like fail2ban for anti-SPAM/DoS/scraping) and feature-based (e.g. logout another session). Short-lived JWTs require client to refresh, which adds complexity. For long-lived JWTs, attacker can stash up JWTs for later.
+http://news.aws.com/dir/page.html -> different origin -> different host
 
 
-## **Cookies**
 
-When designing web applications, (especially the traditional HTML kind), you will at one point have to figure out how to log a user in and keep them logged in between requests.
+Your browser sends an HTTP request to the application server and receives data as an HTTP response. In this scenario, the **current browser** URL is called the **current origin** and the **third-party URL to your server is the cross-origin**
 
-The core mechanism we use for this are cookies. Cookies are small strings sent by a server to a client. After a client receives this string, it will repeat this in subsequent requests. We could store a ‘user id’ in a cookie, and for any future requests we’ll know what user_id the client was.But this is very insecure. The information lives in the browser, which means users can change USER_ID and be identified as a different user.
 
-First off, some general facts.
+* Client Application - current origin
 
-A cookie is stored in the browser and then sent back to the target server with every request to that server.
+* Server - cross origin
 
-A cookie can either contain actual state data (such as backgroundColor=blue) or it can just contain a token that only means something to the server.
+When you make a cross-origin request, this is the request-response process:
 
-Whoever sets a cookie decides how long they want it to last before it "expires". If the server sets the cookie (as cookies can also be set from within Javascript in the web page), then the server decides how long they want the cookie to last.
+   1. The browser adds an origin header, this header contains the origin of the request, which is the domain, protocol, and port of the page making the request. When the browser sends a request to a server, it includes this Origin header. 
+   2.  The server checks the current origin header. The server can then decide whether to allow or deny the request. If the request is allowed, the server includes the Access-Control-Allow-Origin header in the response. This header specifies the origin that is allowed to access the resources.
+   3.  If the request is denied, the server includes the Access-Control-Allow-Origin header with a value of "*", which indicates that no origin is allowed to access the resources.
 
-A server session consists of the server creating a unique token and putting that in a cookie that it sets for that browser. In parallel, it also creates a session object that is stored on the server and it creates a means of associating the token with a particular session object such that when a request comes in and it has a particular token in it, the server can find the corresponding session object.
 
-Note, sessions don't have to use cookies. They can also put a session id in the URL itself and that is occasionally used, but isn't very popular for a variety of reasons.
 
-    How does browse and / or server know that the user has already logged in and does not need to log in again?
+Access-Control-Allow-Origin - this is a reponse header that indicates whether a server's response can be shared with a requesting client.
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Origin: <origin>
 
-A server can consider a browser to be already logged in if it finds an appropriate cookie in the incoming request and if it finds an associated session object in the server-side session store and if that session object is both logged in and not expired.
+Consider a site called https://news.example.com that wants to access resources from an API at partner-api.com. Developers at https://partner-api.com first configure the cross-origin resource sharing (CORS) headers on their server by adding new.example.com to the allowed origins list. They do this by adding the below line to their server configuration file. Access-Control-Allow-Origin: https://news.example.com
 
-    If the Session stays inside the cookie why is this difference?
+Once CORS access is configured, news.example.com can request resources from partner-api.com. For every request, partner-api.com will respond with Access-Control-Allow-Credentials : "true." The browser then knows the communication is authorized and permits cross-origin access.
 
-Usually, when using server-side sessions, all that's in the cookie is a unique token - not any of the actual session data.
 
-    Where is the cookie stored? In our browser?
+**What is a cors preflight request?**
 
-Yes, it's stored on your hard drive by the browser and then sent as an http header along with every request to the server that the cookie is associated with.
 
+A simple request is one that uses methods such as GET, HEAD, or POST. These methods are considered safe because they are not capable of causing a change in state on the server.A pre-flighted request is one that uses a method such as PUT or DELETE. These methods can cause a change in state on the server, so the browser sends a request to the server to check if the request is allowed. The server then responds with the appropriate headers, and if the response is successful, the browser sends the actual request.
 
+In HTTP, request methods are the data operations the client wants the server to perform. Common HTTP methods include GET, POST, PUT, and DELETE. 
 
-This is an implementation detail of the website, so this can't be directly answered.
+The CORS mechanism works by adding HTTP headers to cross-origin HTTP requests and responses. These headers indicate whether the request or response is allowed to access the resources.
 
-The session cookie may be created server side and associated with the saved session, but it still has to be saved client side so that the client browser can remind the server which session to use (and verify it).
 
-From the browser's perspective, there is no difference between a session cookie and any other cookie. It's just a cookie. So there's no technical reason why all the cookies can't coexist as long as there are no name collisions.
 
-From the web server's perspective, if the non-session cookies had a purpose, that purpose is likely still there when there is a session, so deleting them to use the session in its place would probably just make the code more complex. But this doesn't say if they will or won't do that.
+In a regular cross-origin resource sharing (CORS) interaction, the browser sends the request and access control headers at the same time. These are usually GET data requests and are considered low-risk.
 
-So, another way to ask the question would be "Are the authors of the website going to be lazy and not bother deleting redundant cookies, or are they going to be fancy and merge them into the session and clean things up?"
+However, some HTTP requests are considered complex and require server confirmation before the actual request is sent. The preapproval process is called preflight request.
+Cross-origin requests are complex if they use any of the following:
+    Methods other than GET, POST, or HEAD
+    Headers other than Accept-Language, Accept, or Content-Language
+    Content-Type headers other than multipart/form-data, application/x-www-form-urlencoded, or text/plain
 
-Also consider the session cookie and the other cookies may all have different lifetimes, so it might not make sense to merge them anyway.
+    How preflight requests work
 
+Browsers create preflight requests if they are needed. It's an OPTIONS request like the following one.
 
+OPTIONS /data HTTP/1.1
 
-JWTs were never designed for handling sessions. They are a way of exchanging integrity-protected messages between services. Have a look at this article: http://cryto.net/~joepie91/blog/2016/06/13/stop-using-jwt-for-sessions/ which explains why using JWTs for handling sessions is not a good idea.
+Origin: https://example.com
 
-You can also read about the BFF pattern: https://curity.io/resources/learn/the-bff-pattern/ where you use a lightweight backend component for handling tokens, and still deal only with sessions in the frontend. Because it's a light component it's easy to scale it - e.g. it can be a lambda function.
+Access-Control-Request-Method: DELETE
 
-So in my opinion, there are no real good use cases where you genuinely prefer JWT-based session over cookie-based session, but (as any strong opinion), this may trigger a discussion ;
+The browser sends the preflight request before the actual request message. The server must respond to the preflight request with information about the cross-origin requests the server’s willing to accept from the client URL. The server response headers must include the following:
 
+    Access-Control-Allow-Methods
+    Access-Control-Allow-Headers
+    Access-Control-Allow-Origin
 
+An example server response is given below.
 
-JWT was born to provide secured access to APIs from mobile apps. Software developers started using them for web browser based clients as well but they are not suited due to security concerns. You will find many articles on this topic. For web application, it is best to store token at server side, link it with a new session, return the session after login to the web browser and store it in the session cookie.
+HTTP/1.1 200 OK
 
+Access-Control-Allow-Headers: Content-Type
 
+Access-Control-Allow-Origin: https://news.example.com
 
+Access-Control-Allow-Methods: GET, DELETE, HEAD, OPTIONS
 
-Sometimes your user agent isn't a browser and authentication via cookies is not appropriate.
+The preflight response sometimes includes an additional Access-Control-Max-Age header. This metric specifies the duration (in seconds) for the browser to cache preflight results in the browser. Caching allows the browser to send several complex requests between preflight requests. It doesn’t have to send another preflight request until the time specified by max-age elapses.
 
-Sending a username and password in every request means that it's easier for the credentials to get intercepted and reused by a malicious actor.
 
-Bearer tokens like JWTs encode information about the caller so that you can make authorization decisions about the identity that they represent, are easy to verify, and are (usually) short-lived so they will only work for a limited time if they are intercepted and stolen.
+**Cors Best Practices**
 
-Finally, using JWTs makes it much easier to delegate authentication to an external identify provider written by people who know much more about authentication and security than you or I do.
+* Define Access Lists- avoid wildcards * 
+* Avoid null origin
 
+Some browsers send the value null in the request header for certain scenarios like file requests or requests from the local host. However, you shouldn’t include the null value in your access list. It also introduces security risks as unauthorized requests containing null headers may get access.
 
-A cookie is simply a short text string that is sent back and forth between the client and the server. You could store name=bob; password=asdfas in a cookie and send that back and forth to identify the client on the server side. You could think of this as carrying on an exchange with a bank teller who has no short term memory, and needs you to identify yourself for each and every transaction. Of course using a cookie to store this kind information is horrible insecure. Cookies are also limited in size.Now, when the bank teller knows about his/her memory problem, He/She can write down your information on a piece of paper and assign you a short id number. Then, instead of giving your account number and driver's license for each transaction, you can just say "I'm client 12"
-Translating that to Web Servers: The server will store the pertinent information in the session object, and create a session ID which it will send back to the client in a cookie. When the client sends back the cookie, the server can simply look up the session object using the ID. So, if you delete the cookie, the session will be lost.
-One other alternative is for the server to use URL rewriting to exchange the session id.
-Suppose you had a link - www.myserver.com/myApp.jsp You could go through the page and rewrite every URL as www.myserver.com/myApp.jsp?sessionID=asdf or even www.myserver.com/asdf/myApp.jsp and exchange the identifier that way. This technique is handled by the web application container and is usually turned on by setting the configuration to use cookieless sessions.
 
 
-Sessions are server-side files that contain user information, while Cookies are client-side files that contain user information. Sessions have a unique identifier that maps them to specific users. This identifier can be passed in the URL or saved into a session cookie.
-Most modern sites use the second approach, saving the identifier in a Cookie instead of passing it in a URL (which poses a security risk). You are probably using this approach without knowing it, and by deleting the cookies you effectively erase their matching sessions as you remove the unique session identifier contained in the cookies.
 
-Cookies and session both store information about the user (to make the HTTP request stateful) but the difference is that cookies store information on the client-side (browser) and sessions store information on the server-side. A cookie is limited in the sense that it stores information about limited users and only stores limited content for each user. A session is not limit in such a way.
 
-Cookie is basically a global array accessed across web browsers. Many a times used to send/receive values. it acts as a storage mechanism to access values between forms. Cookies can be disabled by the browser which adds a constraint to their use in comparison to session.
 
-Session can be defined as the interval between logging in and logging out. the time between the user logging in and logging out is a session. Session stores values only for the session time i.e before logging out. Sessions are used to track the activities of the user, once he logs on.
 
 
 
-## **Sessions**
+### **<ins>JavaScript Dates</ins>**
 
-The traditional way to solve this is what’s known as a ‘session’. I don’t know what the earliest usage of sessions is, but it’s in every web framework, and has been since web frameworks are a thing.
+<ins>Timezones: Two timezones matter in JS:</ins>
 
-Often, sessions and cookies are described as 2 different things, but they’re really not. A session needs a cookie to work.
+* The Local Timezone your computer is in
+* UTC (GMT) 
 
-Instead of a predictable user id, we’re sending the client a completely random session id that is impossibly hard to guess. The ID has no further meaning, and doesn’t decode to anything. This is sometimes called an opaque token.
+**By default all but one date method in JS gives date/time in local time. You only get UTC if you specify UTC**
 
-When a client repeats this session id back to the server, the server will look up the id in (for example) a database, which links it back to the user id. When a user wants to log out, the session id is removed from the data storage, which means the cookie is no longer associated with a user.
+<ins>Creating a Date in JS:</ins>
 
-Where is the session data stored?
+Create a date with new Date() used four ways
 
-Languages like PHP have a storage system for this built in, and will by default store data in the local filesystem. In the Node.js ecosystem, by default this data will be in ‘memory’ and disappear after the server restarts.
-
-These approaches make sense on developer machines, or when sites were hosted on long-lived bare-metal servers, but these days a deploy typically means a completely fresh ‘system’, so this information needs to be stored in a place that outlives the server. An easy choice is a database, but it’s common for sites to use systems like Redis and Memcached, which works for tiny sites, but still works at massive scales.
-
-JWT itself is a standard for encrypting/signing JSON objects and it’s used a LOT for authentication. Instead of an opaque token in a cookie, we actually embed the user_id again, but we include a signature. The signature can only be generated by the server, and it’s calculated using a ‘secret’ and the actual data in the cookie.
-
-This means that if the data is tampered with (the user_id was changed), the signature no longer matches.
-
-So why is this useful? The best answer I have for this, is that it’s not needed to have a system for session data, like Redis or a database. All the information is contained in the JWT, it means your infrastructure is in theory simpler. You’re potentially making fewer calls to a data-store on a per-request basis.
-
-Drawbacks
-
-**There are major drawbacks to using JWT.**
-
-First, it’s a complicated standard and users are prone to get the settings wrong. If the settings are wrong, in the worst case it could mean that anyone can generate valid JWTs and impersonate anyone else. This is not a beginners-level problem either, last year Auth0 had a bug in one of their products that had this very problem.
-
-Auth0 is(or was? they just got acquired) a major vendor for security products, and ironically sponsor the jwt.io website. If they’re not safe, what chance does the general (developer) public have?
-
-However, this issue is part of a larger reason why many security experts dislike JWT: it has a ton of features and a very large scope, which gives it a large surface area for potential mistakes, by either library authors or users of those libraries. (alternative stateless tokens to JWT exists, and some of them do solve this.)
-
-A second issue is ‘logging out’. With traditional sessions, you can just remove the session token from your session storage, which is effectively enough to ‘invalidate’ the session.
-
-With JWT and other stateless token this is not possible. We can’t remove the token, because it’s self-contained and there’s no central authority that can invalidate them.
-
-This is typically solved in three ways:
-
-    The tokens are made very short lived. For example, 5 minutes. Before the 5 minutes are over, we generate a new one. (often using a separate refresh token).
-    Maintain a system that has a list of recently expired tokens.
-    There is no server-driven log out, and the assumption is that the client can delete their own tokens.
-
-Good systems will typically use the first two. An important thing to point out is, in order to support logout, you’ll likely still need a centralized storage mechanism (for refresh tokens, revocation lists or both), which is the very thing that JWT were supposed to ‘solve’.
-
-    Sidenote: some people like JWT because it’s fewer systems to hit per request, but that contradicts with being able to revoke tokens before they expire.
-
-    My favourite solution to this is keep a global list of JWTs that have been revoked before they expired (and remove the tokens after expiry). Instead of letting webservers hit a server to get this list, push the list to each server using a pub/sub mechanism.
-
-    Revoking tokens is important for security, but rare. Realistically this list is small and easily fits into memory. This largely solves the logout issue.
-
-A last issue with JWT is that they are relatively big, and when used in cookies it adds a lot of per-request overhead.
-
-All in all, that’s a lot of drawbacks just to avoid a central session store. It’s not my opinion that JWT are universally a bad idea or without benefits, but there is a lot to consider.
-
-One thing that’s surprised me when reading tech blogs, is that there is a lot of chatter around JWT. Especially on Medium and subreddits like /r/node I see intros to JWT on an extremely regular basis.
-
-I realize that that doesn’t mean that ‘JWTs are more popular than session tokens’, for the same reason that GraphQL isn’t more popular than REST, or NoSQL than relational databases: it’s just not that interesting to write about the technology that’s been tried and tested for a decade or more (See: Appeal to novelty). In addition, subject experts that write about new solutions are likely going to have different problems & scale than the majority of their own readers.
-
-However, these new technologies create a lot more buzz than their simpler counterparts, and if enough people keep talking about the hot thing, eventually this can translate to actual adoption, despite it being a sub-optimal choice for the majority of simple use-cases.
-
-This is similar to many newer developers learning how to build SPAs with React before server-rendered HTML. Experienced devs would likely feel that server-rendered HTML should probably be your default choice, and building an SPA when needed, but this is not what new developers are typically taught.
-
-Adopting complex systems before the simple option is considered is something I see happening more, but it surprised me for JWT.
-
-As an exercise, I looked up the top most popular (by votes) posts on /r/node that mention JWT. I was going to go over the first 100, but got bored after the top 12.
-
-From these 12 articles and Github repos:
-
-    1 mentions using a revocation list, 3 mention refesh tokens. The remaining articles and github repositories simply have no means of logging out.
-    1 article mentions that it might be better to use a standard session storage instead.
-    1 article uses both a standard session storage and JWT, making JWT unneeded.
-    1 github repository ships with pre-generated private keys. (yup)
-    Most of posts use expiry times of weeks or months and 3 posts never expire their JWTs.
-
-Except 1, the quality of these highly upvoted posts was extremely low, the authors were likely not qualified to write about this and can potentially cause real-world harm.
-
-All this at least confirmed my bias that JWT for security tokens is hard to get right.
-
-On JWT and scale
-
-Going through tons of Reddit posts and comments also got me a more refined idea of why people think JWTs are better. The top reason everywhere is: “It’s more scalable”, but it’s not obvious at what scale people think they’ll start to have issues. I believe the point where issues start to appear is likely much higher than is assumed.
-
-Most of us aren’t Facebook, but even at ‘millions of active sessions’, a distributed key->value store is unlikely going to buckle.
-
-Statistically, most of us are building applications that won’t make a Raspberry Pi break a sweat.
-Conclusion
-
-Using JWTs for tokens add some neat properties and make it possible in some cases for your services to be stateless, which can be desirable property in some architectures.
-
-Adopting them comes with drawbacks. You either forego revocation, or you need to have infrastructure in place that be way more complex than simply adopting a session store and opaque tokens.
-
-My point in all this is not to discourage the use of JWT in general, but be deliberate and careful when you do. Be aware of both the security and functionality trade-offs and pitfalls. Keep it out of your ‘boilerplates’ and templates, and don’t make it the default choice.
-
-
-
-I work at Auth0 and I was involved in the design of the refresh token feature.
-
-It all depends on the type of application and here is our recommended approach.
-Web applications
-
-A good pattern is to refresh the token before it expires.
-
-Set the token expiration to one week and refresh the token every time the user opens the web application and every one hour. If a user doesn't open the application for more than a week, they will have to login again and this is acceptable web application UX.
-
-To refresh the token, your API needs a new endpoint that receives a valid, not expired JWT and returns the same signed JWT with the new expiration field. Then the web application will store the token somewhere.
-Mobile/Native applications
-
-Most native applications do login once and only once.
-
-The idea is that the refresh token never expires and it can be exchanged always for a valid JWT.
-
-The problem with a token that never expires is that never means never. What do you do if you lose your phone? So, it needs to be identifiable by the user somehow and the application needs to provide a way to revoke access. We decided to use the device's name, e.g. "maryo's iPad". Then the user can go to the application and revoke access to "maryo's iPad".
-
-Another approach is to revoke the refresh token on specific events. An interesting event is changing the password.
-
-We believe that JWT is not useful for these use cases, so we use a random generated string and we store it on our side.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-The JWT is the actually encrypted token that the server-side piece verifies to ensure that the person actually is who they say they are. This is stored as an http-only cookie on the browser, and is not available to any JS for security reasons.
-
-If you want to get any of the data about who the user is, you can read the session. The session exists only client side, and is constructed out of some of the data in the JWT, and any other info you want to put on there.
-
-
-
-
-
-
-
-
-At some point, if your user base grows, the database becomes a bottleneck and you'll need to reduce the amount of database requests.One way of doing that is removing session requests and authenticating via JWT.
-This is especially handy in a distributed system. User-actions may cause requests to several http-endpoints that all have to somehow individually verify the authentication. Maybe these http-endpoints even belong to completely different applications in your company. At some point, it becomes easier and considerably more performant to have JWTs. But by all means! Go session-first! Sessions are way easier to implement securely. You should have a reason to implement JWTs and you should follow OWASP guidelines if you do.This won't happen for +95% of web apps... but if it does then a simple solution is to cache the sessions in memory or maybe some Redis for more intensive usage. 
-
-
-
-Generating JWT tokens at that scale is resource intensive, also to extend the expiry time every time you get request from loggedin user within the expiry time and you have to do this for every user. Add concept like refresh token along with extending time to expiry on EVERY request makes all this effort to make auth happen way to complicated.Instead, a better approach is, once the user puts in username/password from frontend, verify them in backend and generate a session UUID ONCE along with user info saved in central Redis (with an expiry time set, which redis will delete it automatically if the key time has elapsed). Send the uuid as a response along with user session info as a response.
-Now, for every request from the UI, the UI will pass session uuid as a bearer token. If redis still has the uuid key pointing to user session then the session is valid and you just increase the redis session uuid key expiry date and allow the request or else give a 401 error and stop the request. This way you avoid the mess of creating jwt with an short lived expiry date, creating a long lived refresh jwt token, getting a new jwt token once its expired using refresh token, invalidating both tokens on logout and if refresh token is stolen then its the same unsecured mess.
-
-
-JWTs are handy for decoupling services, however they really shouldn't be the default and I'd recommend starting with server-side sessions. Then JWTs would be used if that is not enough and or if the architecture gets complex enough to warrant separating services from the same session database. Sites that do not need security/admin/etc functionalities should use simple cookies for state. Sites that need more complex login/admin/etc functionalities should use server-side sessions. Sites that need complex, decoupled architectures should consider using JWTs, albeit even then I'd recommend some sort of a central authentication server and ping-ponging between that and the services relying on auth.
-
-Namely, you can't invalidate them on-demand. This means you can't implement a secure logout as there is no way to expire already issued tokens. You also can't implement idle timeout for the same reason. One solution is to keep a blacklist, but that introduces state. If your clients only interact with your service via a browser, I strongly recommend using a cookie-based session management solution. I also compiled a list authentication methods currently widely used on the web.
-
-
-And for whitelisting or blacklisting tokens, you may use redis(instead of db), for lookup.
-
-
-
-Best practice for SPA is to use a backend for frontend.The reason is that in a SPA you need to have some trusted information the access token accessible by javascript which will at some point be vulnerable by an xss attack, even reflective xss is an issue because if a user "validates" an irl to be suspicious or not they look at the domain not the path parameters + there could be many path parameters. Having a lightweigt backend and a session cookie will improve security, there is still the risk of csrf etc but that should be easier to secure, in addition when the browser session ends the malicious actor loses access, if they had the access token or refresh token they could use the access token until it expires or refresh it indefinatly...
-
-
-If you’re creating an API that will be used by a front-end like a React app, sessions with secure HTTP-only cookies are generally the most secure. They’re a bit harder to set up and configure, with stuff like CORS, typically Redis, etc. But once you’re up and running, you’re good to go. If you can’t be bothered with all that, JWTs are OK. They’re also a good fit for API-to-API communication, where you’re not necessarily identifying users using cookies/sessions.
-
-Simple session if possible, JWT if not.
-
-The creator of JWTs has himself said they are overused. They are meant for authenticating a user across multiple services. For the average app with a single api + DB, sessions are more than fine and half the work with something like redis.
- JWT is nice, because if you mess up your CORS your users won't be vulnerable to CSRF. 
-
-
-    Stateless JWT: A JWT token that contains the session data, encoded directly into the token.
-    Stateful JWT: A JWT token that contains just a reference or ID for the session. The session data is stored server-side.
-    Session token/cookie: A standard (optionally signed) session ID, like web frameworks have been using for a long time. The session data is stored server-side.
-    To be clear: This article does not argue that you should never use JWT - just that it isn't suitable as a session mechanism, and that it is dangerous to use it like that. Valid usecases do exist for them, in other areas. At the end of this article, I'll briefly go into those other usecases.
-    A lot of people mistakenly try to compare "cookies vs. JWT". This comparison makes no sense at all, and it's comparing apples to oranges - cookies are a storage mechanism, whereas JWT tokens are cryptographically signed tokens.
-    They aren't opposites - rather, they can be used either together or independently. The correct comparisons are "sessions vs. JWT" and "cookies vs. Local Storage".
-
-In this particular article, I will be comparing sessions to JWT tokens, and occasionally go into "cookies vs. Local Storage" as well where it makes sense to do so.
-
-
-A cookie with the HttpOnly attribute is inaccessible to the JavaScript Document.cookie API; it is sent only to the server. For example, cookies that persist server-side sessions don't need to be available to JavaScript, and should have the HttpOnly attribute. This precaution helps mitigate cross-site scripting (XSS) attacks.
-
-You can't set it with document.cookie because the entire point of the flag is to prevent it being set (or read) with document.cookie. Well, you can't. If the cookie is httponly, there is no way to add its content to the Authorization header. You either need to store tokens directly in the JS code (e.g. in local storage or memory - taking into consideration the risk), or you need to add a proxy between the APIs and your SPA. The proxy will extract the token from the cookie and place it in the Authorization header.
-
-CORS:
-The use-case for CORS is simple. Imagine the site alice.com has some data that the site bob.com wants to access. This type of request traditionally wouldn’t be allowed under the browser’s same origin policy. However, by supporting CORS requests, alice.com can add a few special response headers that allows bob.com to access the data. In order to understand it well, please visit this nice tutorial.. How to solve the issue of CORS
-
-
-
-If anybode else has similar problem that you can see that the cookie is a part of the response header but you can't verify that the cookie is actually being set in the browser. It could be due to that the backend and frontend is on different domains. You are checking for the cookie in the frontend domain but it has been set with the backend servers domain. Go to the same url as the backend server and open your browsers storage and it will probably be there then. 
-
-A cookie with the Secure attribute is only sent to the server with an encrypted request over the HTTPS protocol. It's never sent with unsecured HTTP (except on localhost), 
-
-Author of the following article argues that a disadvantage of JWT is that the only way to recover from a stolen JWT is to generate a new key-pair and effectively log all users out. Whereas with session-ids stored in a DB the website could delete only the sessions of the affected user and log him out of all devices
-
-
-
-I know this is an old question but I think I can drop my $0.50 here, probably someone can improve or provide an argument to totally decline my approach. I'm using JWTs in a RESTful API over HTTPS (ofc).
-
-For this to work, you should always issue short-lived tokens (depends on most cases, in my app I'm actually setting the exp claim to 30 minutes, and ttl to 3 days, so you can refresh this token as long as its ttl is still valid and the token has not been blacklisted)
-
-For the authentication service, in order to invalidate tokens, I like to use an in-memory cache layer (redis in my case) as a JWT blacklist/ban-list in front, depending on some criterias: (I know it breaks the RESTful philosophy, but the stored documents are really short-lived, as I blacklist for their remaining time-to-live -ttl claim-)
-
-Note: blacklisted tokens can't be automatically refreshed
-
-    If user.password or user.email has been updated (requires password confirmation), auth service returns a refreshed token and invalidates (blacklist) previous one(s), so if your client detects that user's identity has been compromised somehow, you can ask that user to change its password. If you don't want to use the blacklist for it, you can (but I don't encourage you to) validate the iat (issued at) claim against user.updated_at field (if jwt.iat < user.updated_at then JWT is not valid).
-    User deliberately logged out.
-
-Finally you validate the token normally as everybody does.
-
-Note 2: instead of using the token itself (which is really long) as the cache's key, I suggest generating and using a UUID token for the jti claim. Which is good and I think (not sure since it just came up in my mind) you can use this same UUID as the CSRF token as well, by returning a secure / non-http-only cookie with it and properly implementing the X-XSRF-TOKEN header using js. This way you avoid the computing work of creating yet another token for CSRF checks.
- 10
-
-To deal with the problem that tokens are getting stolen, you map each JWT with the list of valid IPs.
-
-For eg, when the user logs in with a particular IP when you can add that IP as valid IP for that JWT, and when you get the request pf this JWT from another IP (either the user changed the internet or JWT is stolen, or any reason) you can do the following depending on you use case:
-
-    Map CSRF token with user token and incase it gets stolen then it's CSRF token will not match in that you can invalidate that user token.
-    You can provide a captcha to the user to validate if he is a valid user or not. If he enters the captcha then add that IP to the valid list of that JWT.
-    You can log out the user and make a new request to log in again.
-    You can alert the user that your IP has changed or requested from a different location.
-
-You can also use cache with a small expiry of 5 mins in above use-cases instead of checking each and every time.
-
-Suggest if it can be improved.
-
-Can't we just add the ip of the initial host which has requested to generate this JWT token as part of the claim ? Now when the JWT is stolen and used from a different machine, when the server validates this token, we could verify if the requested machine ip matches with the one set as part of the claim. This would not match and hence the token can be rejected. Also if the user tries manipulate the token by setting his own ip to the token, the token would be rejected as the token is altered.
-
-
-
-Once the token gets stolen - it is game over. However there is a way to make it harder to make use of a stolen token.
-
-Check https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html#token-sidejacking for reference.
-
-Basically, you create a x-Byte long fingerprint in hexadezimal, store its raw value in the token - hash the fingerprint using for example SHA-512 and put the hashed fingerprint inside a httponly secure cookie.
-
-Now instead of validating just the signature and expired date of the token you need to also validate the existence of the cookie and be sure that the raw fingerprint values match.
-
-
-
-
-localStorage should never be used for storing any sensitive data; if you absolutely must use something other than cookies, use at least only sessionStorage instead, which is only available to that window/tab until the window is closed.
-
-    You cannot control the expiration time like you can do with cookies.
-
-    A single XSS vulnerability can be used to steal all the information from data inside localStorage, also it persists when you close the tab.
-
-    localStorage doesn't have any options to restrict the visibility of an object to a specific path like with the attribute path of HTTP Cookies. Cookies are ideal because you have much more control over them: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie You can specify a number of attributes/flags, like: Secure, HttpOnly, SameSite, HostOnly.
-
-    It wasn't designed as a secure storage mechanism, and it's implementation can vary from browser to browser.
-
-    There is no way to restrict script-access to information stored in localStorage, which is possible with the HttpOnly attribute for cookies.
-
-    Cookies are stored encrypted on the client computer, unlike data in local storage.
-
-OWASP strongly advises to never use local storage for storing any sensitive information:
-
-    Any authentication your application requires can be bypassed by a user with local privileges to the machine on which the data is stored. Therefore, it's recommended not to store any sensitive information in local storage.
-
-JWTs are highly sensitive data. Not only because they act as tokens for authentication, but they also very often contain sensitive data like email/username, roles, etc. only base64-encoded (although best practice is to avoid that). So they are often still to be considered sensitive data even when they are not valid anymore.
-
-I recommend to read the corresponding section in OWASP's HTML5 Security Cheat Sheet: https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/HTML5_Security_Cheat_Sheet.md
-
-An interesting read about the topic can be found at: https://dev.to/rdegges/please-stop-using-local-storage-1i04
-
-
-Simply put: In REST applications, each request must contain all of the information necessary to be understood by the server, rather than be dependent on the server remembering prior requests.
-
-Storing session state on the server violates the stateless constraint of the REST architecture. So the session state must be handled entirely by the client.
-
-Keep reading for more details.
-The session state
-
-Traditional web applications use remote sessions. In this approach, the application state is kept entirely on the server. See the following quote from Roy T. Fielding's dissertation:
-
-    3.4.6 Remote Session (RS)
-
-    The remote session style is a variant of client-server that attempts to minimize the complexity, or maximize the reuse, of the client components rather than the server component. Each client initiates a session on the server and then invokes a series of services on the server, finally exiting the session. Application state is kept entirely on the server. [...]
-
-While this approach introduces some advantages, it reduces the scalability of the server:
-
-    The advantages of the remote session style are that it is easier to centrally maintain the interface at the server, reducing concerns about inconsistencies in deployed clients when functionality is extended, and improves efficiency if the interactions make use of extended session context on the server. The disadvantages are that it reduces scalability of the server, due to the stored application state, and reduces visibility of interactions, since a monitor would have to know the complete state of the server.
-
-The stateless constraint
-
-The REST architectural style is defined on the top of a set constraints that include statelessness of the server. According Fielding, the REST stateless constraint is defined as the following:
-
-    5.1.3 Stateless
-
-    [...] each request from client to server must contain all of the information necessary to understand the request, and cannot take advantage of any stored context on the server. Session state is therefore kept entirely on the client. [...]
-
-This constraint induces the properties of visibility, reliability, and scalability:
-
-    Visibility is improved because a monitoring system does not have to look beyond a single request datum in order to determine the full nature of the request. Reliability is improved because it eases the task of recovering from partial failures. Scalability is improved because not having to store state between requests allows the server component to quickly free resources, and further simplifies implementation because the server doesn't have to manage resource usage across requests.
-
-Authentication and authorization
-
-If the client requests protected resources that require authentication, every request must contain all necessary data to be properly authenticated/authorized. See this quote from the RFC 7235:
-
-    HTTP authentication is presumed to be stateless: all of the information necessary to authenticate a request MUST be provided in the request, rather than be dependent on the server remembering prior requests.
-
-And authentication data should belong to the standard HTTP Authorization header. From the RFC 7235:
-
-    4.2. Authorization
-
-    The Authorization header field allows a user agent to authenticate itself with an origin server -- usually, but not necessarily, after receiving a 401 (Unauthorized) response. Its value consists of credentials containing the authentication information of the user agent for the realm of the resource being requested. [...]
-
-The name of this HTTP header is unfortunate because it carries authentication instead of authorization data.
-
-For authentication, you could use the Basic HTTP Authentication scheme, which transmits credentials as username and password pairs, encoded using Base64:
-
-Authorization: Basic <credentials>
-
-If you don't want to send the username and password in each request, the username and password could be exchanged for a token (such as JWT) that is sent in each request. JWT can contain the username, an expiration date and any other metadata that may be relevant for your application:
-
-Authorization: Bearer <token>
-
-What might be wrong with your server
-
-Once you have a session indentifier, I guess a HTTP session is being created somewhere in your application. It can be in your own code or in the code of the framework you are using.
-
-In Java applications, you must ensure that the following methods are not getting invoked:
-
-    HttpServletRequest#getSession()
-    HttpServletRequest#getSession(boolean) with true
-
-
-
-reference for package.json scripts https://medium.com/@sudarshanadayananda/how-to-live-reload-typescript-node-server-bc40171fdb7
-
-
-
-dev-This script is the main one we’ll be using every time we develop locally. It will run nodemon which will check for our nodemon.json file we created earlier. Every time a change is made matching our criteria the script specified in the exec property will run.
-
-
-
-"build": "rimraf ./dist && tsc": This command cleans the output directory and then compiles the TypeScript code into JavaScript.
-
-"start": "yarn build && node dist/app.js" Executes the compilation and then starts the application by running the resulting JavaScript file.
-
-https://baguilar6174.medium.com/boilerplate-for-your-node-projects-with-express-add98ea89c9f
-
-Cookie-secure
-
-Indicates that the cookie is sent to the server only when a request is made with the https: scheme (except on localhost), and therefore, is more resistant to man-in-the-middle attacks Do not assume that Secure prevents all access to sensitive information in cookies (session keys, login details, etc.). Cookies with this attribute can still be read/modified either with access to the client's hard disk or from JavaScript if the HttpOnly cookie attribute is not set.
-
-Insecure sites (http:) cannot set cookies with the Secure attribute (since Chrome 52 and Firefox 52). The https: requirements are ignored when the Secure attribute is set by localhost (since Chrome 89 and Firefox 75).
-
-
-
-
-## **Other Points of Note** 
-
-**Sign-In Form Best Practices**
-
--Don't make users input info twice (it increases abandonment rates) just make them confirm their email
-
--Allow users the option to see their unobscured password.
-
--Give mobile users the appropriate keyboard for their input (e.g. type="email)
-
--Help browsers store data correctly to help avoid users having to repetitively input their details, increasing abandonment rates. 
-
-    a. The autocomplete, name, id, and type attributes help browsers understand the role of inputs in order to store data that can later be used for autofill.
-
-    b. To allow data to be stored for autofill, modern browsers also require inputs to have a stable name or id value (not randomly generated on each    page load or site deployment), and to be in a <form> with a submit button.
-
-    c. Use autocomplete="new-password" and id="new-password" for the password input in a sign-up form, or the new password in a change-password form.
-
-    d. Use autocomplete="current-password" and id="current-password" for the password input in a sign-in form, or the input for the user's old password in a change-password form. This tells the browser that you want it to use the current password that it has stored for the site.Add the required attribute to both email and password fields. Modern browsers automatically prompt and set focus for missing data. 
-
-
-**Common Attack Methods**
-
-**cross-site scripting attacks (XSS)**: This is when an attacker injects malicious client-side code. The user's browser cannot detect the malicious script is untrustworthy, and so gives it access to any cookies, session tokens, or other sensitive site-specific information, or lets the malicious script rewrite the HTML content.XSS does not target the application directly. Instead, XSS targets the users of a web application. This sensitive information is often sent to the bad-actors' server. Prevent it by separating untrusted data from active browser content. 
-
-**man-in-the-middle attacks (MitM)**: A manipulator-in-the-middle attack (MitM) intercepts a communication between two systems. ex. a Wi-Fi router can be compromised. Https encryption on public wifi networks and certificate warnings help prevent this attack
-
-**cross-site request forgery (CSRF)**: This is when an attacker impersonates a trusted user and sends a site unwanted commands.In a CSRF attack, an innocent end user is tricked by an attacker into submitting a web request that they did not intend. This may cause actions to be performed on the website that can include inadvertent client or server data leakage, change of session state, or manipulation of an end user's account. In a CSRF attack, the attacker's goal is to cause an innocent victim to unknowingly submit a maliciously crafted web request to a website that the victim has privileged access to. This web request can be crafted to include URL parameters, cookies and other data that appear normal to the web server processing the request.
-
-
-
-
-
-
-No, they are two separate things and they do not conflict which other. Moreover, passport.session has to be used after express.session in order to work properly.
-
-express.session middleware is used to retrieve user session from a datastore (like Redis). We can find the session object because the session Id is stored in the cookie, which is provided to the server with every request.
-
-Then, the purpose of passport.session middleware is to deserialize user object from session using passport.deserializeUser function (that you define in your passport configuration). When user first authenticates itself, its user object is serialized and stored in the session. On each following request, the middleware deserialize the user and populates req.user object.
-
-
-
-You should always, always use req.user in your own code -- this is important because if you use req.session.passport.user, you're essentially pulling user information out of a session cookie (which may be outdated).
-
-It's always best to rely on req.user as opposed to cookie data directly, as depending on your implementation, that information might be out of date.
-
-And to answer your question: if you log a user out, both req.session and req.user will no longer be available.
-
-
-
-**Login where just a cookie is set**
-
-const login = catchAsync(async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  const user = await authService.login(email, password);
-
-  const cookieOptions = {  
-    httpOnly: true,
-    secure: true,
-    sameSite: 'none',
-    partitioned: true,
-    maxAge: 90000000
-  };
-  res.cookie("userId", user.id, {...cookieOptions});
-  res.send({ user });
-});
-
-
-
-
-
-
-
-You may be conflating the idea of a session with the idea of an authenticated session.
-
-It's normal for all users to have a session - even the anonymous, not-yet-logged-in users. The difference between this and an authenticated session is just that, locally on your web server, you specify that a particular user has been authenticated.
-
-For example, once you authenticate someone, you can set:
-
-req.session.isAuthenticated = true;
-
-Then, when rendering pages, your controllers can do something like
-
-function(req, res, next) {
-  if (!req.session.isAuthenticated) return res.redirect('/login');
-  res.render('appPage');
-}
-
-
-
-The real use of JWTs is when you want third parties to be able to sign their own API requests, that your API will accept using the very same machinery by which it accepts your first-party-client API requests. If you use JWT, you can just pass the third party a private JWT signing key to use, add the corresponding public key to your validation set for JWT decode on your backend, and everything "just works."
-
-6
-
-Oauth is an authorization system, not an authentication system.
-
-OAuth is intended to provide secure access to a resource by a third party. For example, there are applications that allow you to schedule posts to various social media platforms, such as Facebook and Twitter. These applications will store your posts then, at the scheduled time, make a post to that system on your behalf, without having your credentials.
-
-Another common use is, if you are a third party, such as an information scraping tool that is set up to look like a "What color pocket lint matches your auras" poll, such apps will be given some identifying information about you, such as your name and user ID (and possibly a LOT more, if you don't check the permissions carefully.) These provide a round-about identification system, that can sometimes stand in place of authorization, if you trust the OAuth provider. That is, there is no way to prevent this OAuth provider from lying to you about the identification; an admin for the provider could claim to be one of your users and you would have no way to know for certain, if you use their OAuth service as authentication.
-
-If you want to identify users of your mobile app, you could have a "Sign in with [social media platform]" option using OAuth. This can decrease some of the friction of signing in, compared to using a username and password. Just keep in mind that, in this case, you're not the one authenticating your users.
-
-As far as authenticating a user with a normal username and password in your app, and having a session ID passed with each request; this is how most sites work. The OWASP cheat sheet on session management goes into details, but the general best practice can be summed up as:
-
-At least 128 bits (16 bytes, 22 printable Base64 characters) long.
-Generated with a cryptographically secure PRNG.
-Does not represent anything except the session ID (don't include the username).
-Before authenticating, switch to TLS. Never use an authenticated session in non-TLS.
-Cookies may not apply to you, unless you're using a browser, but if they do apply, must have the Secure, SameSite, and HttpOnly attributes with properly configured (and not too permissive) domain and path attributes.
-Recycled on privilege level change (login, logout, changing password).
-Idle timeouts and maximum timeouts.
-Since you are writing a mobile app, you have some more assurances that many web developers don't have. You do not have to rely on cookies for storing your session IDs, so you can get away with having two tokens; a short term session token for your API access, perhaps valid for a few hours, and the other (a "refresh token") to request your short term tokens. This refresh token should be much higher entropy than a session token. In any case, 256 bit tokens will protect against brute force attempts until the heat death of the universe.
-
-You can also use this refresh token as a shared secret, rather than a simple ID like the session ID is. When negotiating a new session ID, you would send some random bytes to the client. They will append these bytes to their refresh token, and calculate a hash based on that, and send the result back. You then compare what they sent back with what your server expects (after doing the same hashing of the refresh token and your nonce). This proves that the client has the correct refresh token, without sending the refresh token over the network.
-
-With this system, an attacker who performed a successful Man-in-the-Middle attack can only hijack a session for as long as you haven't recycled your session IDs, and users will not need to re-authenticate constantly, for as long as the refresh tokens are valid.
-
-JWTs are in end like passwords.
-Sure they have a limited duration.
-
-Sure they might not work for all actions.
-
-Sure they don't need a password database on the side of the receiver.
-
-But it's best to treat them like temporary password + some arbitrary metadata.
-
-So no, they don't protect you from corrupted clients, they just limit the damage in what can happen and when it can happen but the corrupt client can still do all kinds of bad things.
-
-You are making something simple very complex. You don't encode payload in the app itself:
-use HTTPS, you must not worry about encrypting data in the code
-don't configure node to use HTTPS, use a reverse-proxy with a ssl cert and you are done
-the querystring is encrypted by SSL, but the best practice is to not use it for sensitive data
-for sensitive data use the body, it's encrypted too
-That's it. Putting data in the querystring or body is secure as long as you use HTTPS.
-
-JWTs are base64 encoded.
-
-A JWT has 3 parts:
-
-a base64 url encoded json header
-
-a base64 url encoded json body
-
-a base64 url encoded signature
-
-A signed JWT can easily be converted back to plain text without a key. The signature only provides a way to verify that the token was issued by someone who knows the password. Using it the way you suggest only provides integrity protection and does not enhance privacy.
-
-
-I was having this issue, I added max-age and my cookies last for as long as I need them to.
-
-
-"A secure param" shouldn't be part of a URL unless it's some edge case like a fast-expiring data point such as a token exchange in an oAuth flow. Other than something like this, don't do it. URLs get logged to system logs and files on disk, they get cached, get proxied, shared by users, available to JavaScript on a page, and a bunch of other security concerns you don't want to start inventing ways to deal with.
-
-
-
-
-
-This is a security issue common with any naive JWT implementation, but it’s not unique to JWTs, any token system can ultimately fall prey here. There is no way to guarantee 100% security. That token is like a key to a house, they work fine to lock the correct doors; but if a key is lost or stolen it works just as well for anyone else.
-
-To combat these issues, you should have a few additional layers of security.
-
-Sessions. I don’t mean a session storage/cookie or anything, but some identifier claim in the token that lets your server identify a token. This allows you to immediately invalidate any tokens you want for any reason. Did an admin token leak? All admin tokens are immediately revoked. Now that leaked token is worthless. You just changed the locks on the house.
-
-Two tokens: The authentication token and the refresh token. Ideally they get stored somewhat apart from each other. The idea here is that a refresh tokens lives for A hours (however long your actual logged in state is) and then Auth tokens that live for B minutes. These lifetimes are somewhat arbitrary and should be determined by the security needs of your application. Like a financial application? That Auth token may essentially boil down to a nonce. A low-risk personal project? Maybe 30 minutes or more is fine. The Auth token needs a claim identifying its associated refresh token and the refresh token needs a claim allowing the server to identify it’s still valid (“session”).
-
-When an authentication token is expired you send the expired token and it’s refresh token to the server and reissue a new version of each (do not extend the lifetime of refresh tokens). Rotating the refresh token as well as the Auth token is just an additional layer of security - it’s only good for one refresh and if two users are using it then the bad actor either misses the refresh or the main user is alerted when they miss the refresh and can then invalidate their sessions.
-
-For authentication purposes you should never trust anything you did not issue and cannot verify. Your server does issue the UUIDs but you can’t verify that you gave the user that UUID so when they say “I’m user X” and give you an id you say 401 I don’t know you. JWT works well here because you put your claims in the token (like user id, session id, refresh token id, etc) and then you generate a signature with a server side secret. This signature ensures the user cannot change the token payload and allows you to verify that the token was generated by you. You can then trust (to the best of your knowledge) the data in the token. It’s still prone to being stolen, intercepted, etc. you cannot solve all the security problems yourself. You can’t manage the token after it leaves your server.
-
-This list is not exhaustive and there is a whole host of additional aspects you want to be aware of and consider to ensure your server is secure. The best resource for security like this is OWASP, and the RFCs for OAuth and stuff have some good reading. Additionally, authentication is one of those “simple tasks” where you end up drowning in the minutia which is why it’s usually better to leverage an authentication service that manages all that layer for you. You’re bound to miss something and that something will be what an attacker exploits.
-
-
-It may not be required to send the expired access token alongside a refresh token but I like to do it. Usually the request layer is already configured to do it automatically so it’s additional overhead/work (not talking about performance here) to remember this one request needs it removed. It then one additional verification you can perform and if you store the tokens apart in some way then it’s not as easy to nab an access token and the refresh token (but always still possible). Does it solve a lot of issues? Probably not. But it doesn’t hurt anything.
-
-Refresh tokens let the user get a new access token. In a naive implementation (without rotation) I could use one refresh token and get as many access tokens as I want from it until it expires. That’s good but also bad. Which is where rotation comes into play. Each time a refresh token is submitted you issue a new one guaranteeing that any token is good only once. This means any compromised access token/refresh token combination is only valid until they both expire or the refresh token is used. If a token is replayed you can act on the potential that a user has had their session compromised.
-
-It’s all just minor changes that help add incremental bits of secure layers. Since you can’t be perfectly secure you just need to make it more difficult to break.
-
-Issuing a new refresh token on each use and invalidate all credentials / log out the user when detecting refresh token reuse (what else could you do?) is a good idea, the latter is even in the standard.
-
-
-
-Generally, session information is sent using cookies in web applications. However, improper use of HTTP cookies can render an application to several session management vulnerabilities. Some flags can be set for each cookie to prevent these kinds of attacks. httpOnly, Secure and SameSite flags are very important for session cookies. httpOnly flag prevents the cookie from being accessed by client-side JavaScript. This is an effective counter-measure for XSS attacks. Secure flag lets the cookie to be sent only if the communication is over HTTPS. SameSite flag can prevent cookies from being sent in cross-site requests that helps protect against Cross-Site Request Forgery (CSRF) attacks. Apart from these, there are other flags like domain, path and expires. Setting these flags appropriately is encouraged, but they are mostly related to cookie scope not the cookie security. Sample usage of these flags is given in the following example:
-
-JavaScript has a number of unsafe and dangerous legacy features that should not be used. In order to remove these features, ES5 included a strict mode for developers. With this mode, errors that were silent previously are thrown. It also helps JavaScript engines perform optimizations. With strict mode, previously accepted bad syntax causes real errors. Because of these improvements, you should always use strict mode in your application. In order to enable strict mode, you just need to write "use strict"; on top of your code.
-
-The following code will generate a ReferenceError: Can't find variable: y on the console, which will not be displayed unless strict mode is used:
-
-
-
-.env variables are always set as strings
-
-
-**Javascript Dates**
-
-Timezones: Two timezones matter in JS:
--The Local Timezone your computer is in
--UTC (GMT) 
-
-By default all but one date method in JS gives date/time in local time. You only get UTC if you specify UTC. 
-
-Creating a Date in JS:
-
-create a date with new Date() used four ways
-
-**with date string**
+**With date string**
 new Date('1987-07-09')
 always formate date-strings with ISO 8601 (which is accepted world wide) `YYYY-MM-DDTHH:mm:ss.sssZ`, 
 
@@ -821,38 +389,42 @@ remember that months are zero-indexed
 Dates created with arguments are in local time.
 
 **With Timestamps**
-In JavaScript, a timestamp is the amount of milliseconds elapsed since 1 January 1970 (1 January 1970 is also known as Unix epoch time). From my experience, you rarely use timestamps to create dates. You only use timestamps to compare between different dates (more on this later).
-new Date(1560211200000)
 
-**with no arguments**
+In JavaScript, a timestamp is the amount of milliseconds elapsed since 1 January 1970 (1 January 1970 is also known as Unix epoch time). From my experience, you rarely use timestamps to create dates. You only use timestamps to compare between different dates (more on this later). new Date(1560211200000)
+
+**With no arguments**
 
 new Date()
 If you create a date without any arguments, you get a date set to the current time (in Local Time).
 
 
-Summary about creating dates
+<ins>Summary about creating dates</ins>
 
-    You can create date with new Date().
-    There are four possible syntaxes:
-        With a date string
-        With arguments
-        With timestamp
-        With no arguments
-    Never create a date with the date string method.
-    It’s best to create dates with the arguments method.
-    Remember (and accept) that month is zero-indexed in JavaScript.
+* You can create date with new Date().
+* There are four possible syntaxes: With a date string. With arguments. With timestamp. With no arguments
+* Never create a date with the date string method.
+* It’s best to create dates with the arguments method.
+* Remember (and accept) that month is zero-indexed in JavaScript.
 
-    **Date Formatting in JS**
+<ins>Date Formatting in JS</ins>
 
-    No easy way unlike with other languages. Often rely on libraries.
-    The native Date object comes with seven formatting methods. Each of these seven methods give you a specific value (and they’re quite useless).
+No easy way unlike with other languages. Often rely on libraries.    
+The native Date object comes with seven formatting methods. Each of these seven methods give you a specific value (and they’re quite useless).
+
     const date = new Date(2019, 0, 23, 17, 23, 42)
+
     toString gives you Wed Jan 23 2019 17:23:42 GMT+0800 (Singapore Standard Time)
+
     toDateString gives you Wed Jan 23 2019
+
     toLocaleString gives you 23/01/2019, 17:23:42
+
     toLocaleDateString gives you 23/01/2019
+
     toGMTString gives you Wed, 23 Jan 2019 09:23:42 GMT
+
     toUTCString gives you Wed, 23 Jan 2019 09:23:42 GMT
+
     toISOString gives you 2019-01-23T09:23:42.079Z
 
     Let’s say you want something like Thu, 23 January 2019. To create this value, you need to know (and use) the date methods that comes with the Date object.
@@ -865,7 +437,8 @@ To get dates, you can use these four methods:
     getDay: Gets day of the week (0-6) according to local time. Day of the week begins with Sunday (0) and ends with Saturday (6).
 
 
-    This is used to get you month names:
+This is used to get you month names:
+
 const months = [
   'January',
   'February',
@@ -1026,29 +599,12 @@ Javascript has many Date issues:
 
 
 
-    You are making something simple very complex. You don't encode payload in the app itself:
-use HTTPS, you must not worry about encrypting data in the code
-don't configure node to use HTTPS, use a reverse-proxy with a ssl cert and you are done
-the querystring is encrypted by SSL, but the best practice is to not use it for sensitive data
-for sensitive data use the body, it's encrypted too
-That's it. Putting data in the querystring or body is secure as long as you use HTTPS.
-
-This is a security issue common with any naive JWT implementation, but it’s not unique to JWTs, any token system can ultimately fall prey here. There is no way to guarantee 100% security. That token is like a key to a house, they work fine to lock the correct doors; but if a key is lost or stolen it works just as well for anyone else.
-To combat these issues, you should have a few additional layers of security.
-Sessions. I don’t mean a session storage/cookie or anything, but some identifier claim in the token that lets your server identify a token. This allows you to immediately invalidate any tokens you want for any reason. Did an admin token leak? All admin tokens are immediately revoked. Now that leaked token is worthless. You just changed the locks on the house.
-Two tokens: The authentication token and the refresh token. Ideally they get stored somewhat apart from each other. The idea here is that a refresh tokens lives for A hours (however long your actual logged in state is) and then Auth tokens that live for B minutes. These lifetimes are somewhat arbitrary and should be determined by the security needs of your application. Like a financial application? That Auth token may essentially boil down to a nonce. A low-risk personal project? Maybe 30 minutes or more is fine. The Auth token needs a claim identifying its associated refresh token and the refresh token needs a claim allowing the server to identify it’s still valid (“session”).
-When an authentication token is expired you send the expired token and it’s refresh token to the server and reissue a new version of each (do not extend the lifetime of refresh tokens). Rotating the refresh token as well as the Auth token is just an additional layer of security - it’s only good for one refresh and if two users are using it then the bad actor either misses the refresh or the main user is alerted when they miss the refresh and can then invalidate their sessions.
-For authentication purposes you should never trust anything you did not issue and cannot verify. Your server does issue the UUIDs but you can’t verify that you gave the user that UUID so when they say “I’m user X” and give you an id you say 401 I don’t know you. JWT works well here because you put your claims in the token (like user id, session id, refresh token id, etc) and then you generate a signature with a server side secret. This signature ensures the user cannot change the token payload and allows you to verify that the token was generated by you. You can then trust (to the best of your knowledge) the data in the token. It’s still prone to being stolen, intercepted, etc. you cannot solve all the security problems yourself. You can’t manage the token after it leaves your server.
-This list is not exhaustive and there is a whole host of additional aspects you want to be aware of and consider to ensure your server is secure. The best resource for security like this is OWASP, and the RFCs for OAuth and stuff have some good reading. Additionally, authentication is one of those “simple tasks” where you end up drowning in the minutia which is why it’s usually better to leverage an authentication service that manages all that layer for you. You’re bound to miss something and that something will be what an attacker exploits.
-It may not be required to send the expired access token alongside a refresh token but I like to do it. Usually the request layer is already configured to do it automatically so it’s additional overhead/work (not talking about performance here) to remember this one request needs it removed. It then one additional verification you can perform and if you store the tokens apart in some way then it’s not as easy to nab an access token and the refresh token (but always still possible). Does it solve a lot of issues? Probably not. But it doesn’t hurt anything.
-Refresh tokens let the user get a new access token. In a naive implementation (without rotation) I could use one refresh token and get as many access tokens as I want from it until it expires. That’s good but also bad. Which is where rotation comes into play. Each time a refresh token is submitted you issue a new one guaranteeing that any token is good only once. This means any compromised access token/refresh token combination is only valid until they both expire or the refresh token is used. If a token is replayed you can act on the potential that a user has had their session compromised.
-It’s all just minor changes that help add incremental bits of secure layers. Since you can’t be perfectly secure you just need to make it more difficult to break.
-Issuing a new refresh token on each use and invalidate all credentials / log out the user when detecting refresh token reuse (what else could you do?) is a good idea, the latter is even in the standard.
 
 
-A Unix timestamp specifies the number of seconds. A JSON Web Token uses the number of seconds. JavaScript Date uses the number of milliseconds.
 
-Any cookie that does not have an expiration set is considered a session cookie by the browser and deleted when the browser quits. As a result, even though the old session file may remain on the server, it is no longer accessible once the associated cookie is no longer being sent back by the browser.
+
+
+**A Unix timestamp specifies the number of seconds. A JSON Web Token uses the number of seconds. JavaScript Date uses the number of milliseconds.**
 
 
 
@@ -1061,3 +617,60 @@ Any cookie that does not have an expiration set is considered a session cookie b
 
 
 
+
+
+###  **<ins>Other Points of Note</ins>** 
+
+**Sign-In Form Best Practices**
+
+-Don't make users input info twice (it increases abandonment rates) just make them confirm their email
+
+-Allow users the option to see their unobscured password.
+
+-Give mobile users the appropriate keyboard for their input (e.g. type="email)
+
+-Help browsers store data correctly to help avoid users having to repetitively input their details, increasing abandonment rates. 
+
+    a. The autocomplete, name, id, and type attributes help browsers understand the role of inputs in order to store data that can later be used for autofill.
+
+    b. To allow data to be stored for autofill, modern browsers also require inputs to have a stable name or id value (not randomly generated on each    page load or site deployment), and to be in a <form> with a submit button.
+
+    c. Use autocomplete="new-password" and id="new-password" for the password input in a sign-up form, or the new password in a change-password form.
+
+    d. Use autocomplete="current-password" and id="current-password" for the password input in a sign-in form, or the input for the user's old password in a change-password form. This tells the browser that you want it to use the current password that it has stored for the site.Add the required attribute to both email and password fields. Modern browsers automatically prompt and set focus for missing data. 
+
+
+**Common Attack Methods**
+
+**cross-site scripting attacks (XSS)**: This is when an attacker injects malicious client-side code. The user's browser cannot detect the malicious script is untrustworthy, and so gives it access to any cookies, session tokens, or other sensitive site-specific information, or lets the malicious script rewrite the HTML content.XSS does not target the application directly. Instead, XSS targets the users of a web application. This sensitive information is often sent to the bad-actors' server. Prevent it by separating untrusted data from active browser content. 
+
+**man-in-the-middle attacks (MitM)**: A manipulator-in-the-middle attack (MitM) intercepts a communication between two systems. ex. a Wi-Fi router can be compromised. Https encryption on public wifi networks and certificate warnings help prevent this attack
+
+**cross-site request forgery (CSRF)**: This is when an attacker impersonates a trusted user and sends a site unwanted commands.In a CSRF attack, an innocent end user is tricked by an attacker into submitting a web request that they did not intend. This may cause actions to be performed on the website that can include inadvertent client or server data leakage, change of session state, or manipulation of an end user's account. In a CSRF attack, the attacker's goal is to cause an innocent victim to unknowingly submit a maliciously crafted web request to a website that the victim has privileged access to. This web request can be crafted to include URL parameters, cookies and other data that appear normal to the web server processing the request.
+
+
+
+**When a user changes their password**
+If a user changes their password on any device, then revoke all their refresh tokens forcing them to log in again as soon as their access token expires. This does leave a 'window of uncertainty' but that's unavoidable without hitting a db every time.
+Rate Limiting, password retry attempts
+
+**Strict Mode**
+JavaScript has a number of unsafe and dangerous legacy features that should not be used. In order to remove these features, ES5 included a strict mode for developers. With this mode, errors that were silent previously are thrown. It also helps JavaScript engines perform optimizations. With strict mode, previously accepted bad syntax causes real errors. Because of these improvements, you should always use strict mode in your application. In order to enable strict mode, you just need to write "use strict"; on top of your code. The following code will generate a ReferenceError: Can't find variable: y on the console, which will not be displayed unless strict mode is used:
+
+**params** "A secure param" shouldn't be part of a URL unless it's some edge case like a fast-expiring data point such as a token exchange in an oAuth flow. Other than something like this, don't do it. URLs get logged to system logs and files on disk, they get cached, get proxied, shared by users, available to JavaScript on a page, and a bunch of other security concerns you don't want to start inventing ways to deal with.
+
+
+
+**<ins>Password Security Considerations</ins>**
+
+**Hashing:** One-way Cryptographic hash functions make it mathematically difficult to derive the **input** value from the **output** value.
+
+Password-> Hash -> garbled hexidecimal -> user table
+
+**Salting:** adds random non-obvious words to passwords, helps keep easy to guess passwords secure.
+
+We salt the password and then hash it. Rendering rainbow tables (tables of common passwords) unusable.
+
+**HTTPs** ensures paswords are not sent as plaintext over the wire.
+
+.env variables are always set as strings
