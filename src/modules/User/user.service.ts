@@ -4,7 +4,7 @@ import ClientError from "../../config/error/ClientError.js";
 
 
 //@ts-ignore
-export const createUser = async (userBody: any): Promise<IUser> => {
+const createUser = async (userBody: any): Promise<IUser> => {
   //@ts-ignore
 if(await User.isEmailTaken(userBody.email)) {
   throw ClientError.BadRequest('Email is already taken');
@@ -13,34 +13,47 @@ return User.create(userBody);
   
 };
 
-export const queryUsers = async (filter: Record<string, any>, options: IOptions, search: string): Promise<QueryResult> => {
+const queryUsers = async (filter: Record<string, any>, options: IOptions, search: string): Promise<QueryResult> => {
   //@ts-ignore
   const Users = await User.paginate(filter, options, search);
   return Users;
 };
 
-export const getUserById = async (id: string): Promise<IUser | null> => {
+const getUserById = async (id: string): Promise<IUser | null> => {
   return User.findById(id);
 };
-export const getUserByEmail = async (email:string) => {
+const getUserByEmail = async (email:string) => {
   return User.findOne({ email });
 };
 
-export const updateUserById = async (userId: string, updateBody: any): Promise<IUser | null> => {
+const updateUserById = async (userId: string, updateBody: any): Promise<IUser | null> => {
   const user = await getUserById(userId);
   if (!user) {
     return null;
+  }
+//@ts-ignore
+  if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
+    throw ClientError.BadRequest('Email already taken');
   }
   Object.assign(user, updateBody);
   await user.save();
   return user;
 };
 
-export const deleteUserById = async (userId: string): Promise<IUser | null> => {
+const deleteUserById = async (userId: string): Promise<IUser | null> => {
   const user = await getUserById(userId);
   if (!user) {
-    return null;
+    throw ClientError.NotFound('User Not Found')
   }
   await user.deleteOne();
   return user;
 };
+
+export {
+  createUser,
+  getUserByEmail,
+  getUserById,
+  queryUsers,
+  updateUserById,
+  deleteUserById
+}

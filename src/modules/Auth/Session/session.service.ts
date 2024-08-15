@@ -21,10 +21,10 @@ const deleteSessionById = async (userId: string) => {
   return await Session.findOneAndDelete({user: userId });
 };
 
-const deleteSessionRecordsByUserId = async (userId: string) => {
+const deleteAllSessionRecordsByUserId = async (userId: string) => {
     return await Session.deleteMany({user: userId });
 };
- const deleteSessionRecord = async (userId: string, tokenType: string) => {
+ const deleteSessionRecordsByUserIdAndTokenType = async (userId: string, tokenType: string) => {
  return await Session.deleteMany({user: userId, tokenType: tokenType});
 }
 
@@ -35,6 +35,6 @@ export {
   getSessionRecordByToken,
   invalidateAuthSession,
   deleteSessionById,
-  deleteSessionRecordsByUserId,
-  deleteSessionRecord
+  deleteAllSessionRecordsByUserId,
+  deleteSessionRecordsByUserIdAndTokenType
 }

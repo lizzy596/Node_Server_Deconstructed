@@ -14,9 +14,9 @@
 * **Implement roles-based permissions and implement a route on the client application that requires elevated privileges to access**
 
 
-### **Introduction**
+### **<ins>Introduction</ins>**
 
-<span style="font-sze:1.2em;"><ins>**Authentication**:</ins> </span>
+<span style="font-sze:1.2em;">**Authentication**:</span>
  the process of verifying that some entity is what it claims to be (401 unauthorized)
 
 Authentication can be based on one or more of the following:
@@ -25,9 +25,9 @@ Authentication can be based on one or more of the following:
 * Something the user has (SIM card, one-time password generator, or hardware token)
 * A biometric property of the user (fingerprint, retina, voice)
 
-<span style="font-sze:1.2em;"><ins>**Authorization**:</ins> the process of determining to which resources you have access (403 forbidden)</span>
+<span style="font-sze:1.2em;">**Authorization**:the process of determining to which resources you have access (403 forbidden)</span>
 
-<span style="font-size:1.2em;">A RESTful request by definition stateless, i.e. each request must contain all of the information necessary to be understood by the server, rather than be dependent on the server remembering prior requests. . The server does not remember anything about the requester between requests.  
+<span style="font-size:1.2em;">A RESTful request is by definition stateless, i.e. each request must contain all of the information necessary to be understood by the server, rather than be dependent upon the server remembering prior requests. The server does not remember anything about the requester between requests.  
 
 **Each request from client to server must contain all of the information necessary to understand the request, and cannot take advantage of any stored context on the server. Session state is therefore kept entirely on the client**
 
@@ -674,3 +674,23 @@ We salt the password and then hash it. Rendering rainbow tables (tables of commo
 **HTTPs** ensures paswords are not sent as plaintext over the wire.
 
 .env variables are always set as strings
+
+
+
+### **<ins> Auth WorkFlows</ins>**
+
+
+
+**<ins>Registration</ins>**
+
+
+
+
+
+**<ins>Login</ins>**
+
+
+**<ins>Logout</ins>**
+
+
+**<ins>Password Reset</ins>**

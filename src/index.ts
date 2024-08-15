@@ -2,14 +2,29 @@ import config from './config/config.js';
 import app from './app.js';
 import mongoose from 'mongoose';
 
+
 let server: any;
 
-mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
-  console.log('connected to mongoDB');
-  server = app.listen(config.port, () => {
+mongoose.connect(config.mongoose.url)
+    .then(() => {
+        console.log('Connected to MongoDB');
+          server = app.listen(config.port, () => {
     console.log(`Listening to port ${config.port}`);
   });
-});
+    })
+    .catch((error) => {
+        console.error('Error connecting to MongoDB:', error.message);
+      
+        if (error.name === 'MongoNetworkError') {
+            console.error('Network error occurred. Check your MongoDB server.');
+        } else if (error.name === 'MongooseServerSelectionError') {
+            console.error('Server selection error. Ensure'
+                + ' MongoDB is running and accessible.');
+        } else {
+          console.error('An unexpected error occurred:', error);
+        }
+    });
+ 
 
 const exitHandler = () => {
   if (server) {
