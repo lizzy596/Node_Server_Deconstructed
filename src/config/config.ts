@@ -12,6 +12,7 @@ const envVarsSchema = object({
     JWT_SECRET: string(),
     JWT_ACCESS_EXPIRATION_MINUTES: string(),
     JWT_REFRESH_EXPIRATION_DAYS: string(),
+    JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: string(),
     JWT_REFRESH_COOKIE: string(),
     SMTP_HOST: string(),
     SMTP_PORT: string(),
@@ -35,7 +36,8 @@ const config = {
     secret: value.JWT_SECRET,
     accessTokenExpiration: value.JWT_ACCESS_EXPIRATION_MINUTES,
     refreshTokenExpiration: value.JWT_REFRESH_EXPIRATION_DAYS,
-    refreshCookieName: value.JWT_REFRESH_COOKIE
+    refreshCookieName: value.JWT_REFRESH_COOKIE,
+    verifyEmailTokenExpiration: value.JWT_VERIFY_EMAIL_EXPIRATION_MINUTES,
   },
   mongoose: {
     url: value.MONGODB_URL + (value.NODE_ENV === 'test' ? '-test' : ''),

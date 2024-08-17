@@ -10,6 +10,7 @@ export interface Paginator {
 export interface ISession {
   tokenType: string;
   token: string;
+  expiration?: Date;
   valid?: boolean;
   user: string;
   createdAt?: Date;
@@ -33,6 +34,9 @@ const schema = new Schema<ISession, SessionModel>(
       type: String,
       enum: [tokenTypes.REFRESH, tokenTypes.RESET_PASSWORD, tokenTypes.VERIFY_EMAIL],
       required: true,
+    },
+    expiration: {
+      type: Date,
     },
     valid: {
       type: Boolean,

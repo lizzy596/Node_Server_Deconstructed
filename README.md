@@ -687,6 +687,8 @@ We salt the password and then hash it. Rendering rainbow tables (tables of commo
 
 
 
+
+
 **<ins>Login</ins>**
 
 
@@ -694,3 +696,46 @@ We salt the password and then hash it. Rendering rainbow tables (tables of commo
 
 
 **<ins>Password Reset</ins>**
+
+
+
+
+
+
+
+
+
+
+In JavaScript, Unix time and a Date object are closely related, as Unix time serves as the basis for how JavaScript's Date objects represent points in time.
+Unix Time
+
+Unix time (also known as Epoch time) is a system for tracking time as the number of seconds that have passed since the Unix Epoch. The Unix Epoch is defined as 00:00:00 UTC on January 1, 1970.
+JavaScript Date Object
+
+The Date object in JavaScript is a built-in object that represents a single moment in time. The Date object can be created using Unix time (in milliseconds) or a date string.
+Relationship Between Unix Time and Date Object
+
+    Unix Time as Milliseconds: While Unix time is traditionally measured in seconds, JavaScript's Date object uses milliseconds since the Unix Epoch. This means that to create a Date object from Unix time, you need to multiply the Unix time by 1000 (to convert from seconds to milliseconds).
+
+    Creating a Date Object from Unix Time:
+
+    javascript
+
+const unixTime = 1692293142; // Unix time in seconds
+const date = new Date(unixTime * 1000); // Convert to milliseconds
+console.log(date); // Outputs a Date object
+
+Getting Unix Time from a Date Object:
+You can get the Unix time (in seconds) from a Date object by using the getTime() method and dividing by 1000:
+
+javascript
+
+    const date = new Date(); // Current date and time
+    const unixTime = Math.floor(date.getTime() / 1000); // Convert to seconds
+    console.log(unixTime); // Outputs Unix time
+
+Summary
+
+    Unix time is the number of seconds since January 1, 1970 (UTC).
+    JavaScript's Date object uses milliseconds since January 1, 1970 (UTC).
+    To convert between Unix time and a Date object, multiply or divide by 1000.

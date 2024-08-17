@@ -58,6 +58,14 @@ const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   res.status(httpStatus.OK).send();
 });
 
+
+
+
+
+
+
+
+
 const forgotPassword = catchAsync(async (req: Request, res: Response) => {
   const { email } = req.body;
   await authService.sendForgotPasswordEmail(email);

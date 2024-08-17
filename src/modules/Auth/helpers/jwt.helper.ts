@@ -22,13 +22,14 @@ export interface IAuthTokens {
    refreshToken: { token: string; expiration: {expDate: string, expSeconds: number} }
 }
 
-const generateJWT = (payload: jsonPayload, expiration: string) => {
-return jwt.sign(payload, config.jwt.secret, {expiresIn: expiration});
-}
+const generateJWT = (payload: jsonPayload, expiration: string): string => {
+  return jwt.sign(payload, config.jwt.secret, {expiresIn: expiration});
+};
+
 
 const verifyJWT = async (token:string)  => {
   try {
-   const payload = await  jwt.verify(token, config.jwt.secret);
+   const payload = await jwt.verify(token, config.jwt.secret);
         if(!payload.sub || typeof payload.sub !== 'string') {
         throw ClientError.BadRequest('Invalid credentials')
         }
@@ -74,7 +75,7 @@ const verifyJWT = async (token:string)  => {
 
 const generateEmailVerificationToken = async (userId: string) => {
   await sessionService.deleteSessionRecordsByUserIdAndTokenType(userId, tokenTypes.VERIFY_EMAIL);
-  const emailToken = generateJWT({ sub: userId, tokenType: tokenTypes.VERIFY_EMAIL}, config.jwt.accessTokenExpiration);
+  const emailToken = generateJWT({ sub: userId, tokenType: tokenTypes.VERIFY_EMAIL}, config.jwt.verifyEmailTokenExpiration);
   await sessionService.createSessionRecord({ user: userId, tokenType: tokenTypes.VERIFY_EMAIL, token: emailToken });
   return emailToken;
 }
