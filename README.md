@@ -2,7 +2,11 @@
 
 # **What is ExpressJS?**
 
-Express is a webframework for Node.js (NodeJS is the language, Express is node)
+Express is a webframework for Node.js (NodeJS is the language, Express is node) The framework comes with a generator tool, express-generator, that can be used to quickly generate a skeleton of an application. 
+
+The Express middlewares are everywhere. Express middlewares are functions that get called by the Express routing layer and allow to execute code between the initial request and the code from the destination route. That is why they are called middlewares.
+
+In short, middlewares are functions that have access to Express’ request and response objects and apply modifications to them. 
 
 **Express is a routing and middleware framework, it is essentially a series of middleware function calls. Middleware allows us to affect the req and resp objects**
 
@@ -160,3 +164,28 @@ Importance of HTTP Headers
     Performance: Headers such as Cache-Control and Content-Encoding improve the performance by controlling caching and compression.
     Content Negotiation: Headers like Accept, Accept-Language, and Content-Type are crucial for content negotiation, allowing the server to serve content in the format preferred by the client.
     Cross-Origin Resource Sharing (CORS): Headers like Access-Control-Allow-Origin enable cross-domain communication in web applications.
+
+
+-Using gzip compression is always a best practice on a Node.js application. The Express frameworks recommends to use the NPM package compression as middleware to handle the compression process.
+
+-Do not use synchronous functions unless those methods are required for the initial setup. Asynchronous methods need to be used to ensure maximum performance of the app. Node.js 4.0+ exposes the command-line flag --trace-sync-io -- to print a warning whenever your application uses a synchronous API.
+
+-Activity logging is another important topic on any production application. NPM libraries like Winston or Bunyan are suggested by the Express framework as recommended approach to logging. They ensure asynchronous performance and facilitate the writing of logs to single commands like: winston.log('info', 'Hello distributed log files!');
+
+-Node application might crash. That is why it is very important to handle exceptions properly and prevent a production application to go offline. The use of a process manager such as PM2 is going to simply administration tasks and ensure an Express application runs 24/7. To prevent application crashes is important to implement try-catch or promise rejection techniques in the code.
+
+-The use of Linting tools is also highly recommended. A Lint process is going to analyse your source code and highlight potential errors on the writing. JSHint or JSLint are some tooling examples.
+
+--Another recommended approach is to use environment variables. This are configurations tied to the environment where an application is running to. Ports where an application listens to, paths and folders accessed on the code or database logins are examples of environment variables. 
+
+-As all frameworks, keeping an eye on updates is important. For instance, Express2.x and Express 3.x are outdated version that shouldn’t be used in production. Checking the Security Updates is highly recommended as it keeps a log track of security vulnerabilities of each version.
+
+-When transferring sensitive data, it is highly recommended to use Transport Layer Security (TLS) to secure the connection. Encryption of the information is important to prevent packet sniffing attacks.
+
+-The Express team recommends reviewing the Headers that are returned by a running application. The use of Helmet can prevent some well-known web vulnerabilities by setting or removing some HTTP headers. For example, the X-Powered-By header can expose the engine behind your application leading attackers to a clue about your application.
+
+-A correct handling of cookies is also a best practice in terms of security. The Express framework exposes two middlewares which can be used: express-session and cookie-session. The following cookie options are recommended to increase security: secure, httpOnly, domain, path and expires.
+
+-Another important topic related to security is protection of brute-force attacks against authorization endpoints. An effective way to block them is to use metrics for consecutive failed attempts by same user and IP address. As an example, block any request from an IP address if it makes 100 failed attempts in a single day. The open source node-rate-limiter-flexible library is a great tool for preventing DDoS and brute force attacks.
+
+-Finally, the Express team highlights the importance of keeping all application dependencies secure. The use of NPM to manage dependencies is a very powerful, but it also can lead to a security breach. The use of tools like Snyk allow a fastest detection of dependencies vulnerabilities.
