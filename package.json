@@ -20,6 +20,8 @@
     "nodemailer": "^6.9.14",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "pino": "^9.3.2",
+    "pino-http": "^10.2.0",
     "redis": "^4.6.14",
     "superstruct": "^1.0.4",
     "uuid": "^9.0.1",

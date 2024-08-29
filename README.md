@@ -9,7 +9,7 @@
 ### **<ins>Introduction</ins>**
 
 <span style="font-sze:1.2em;">**Logging**:</span>
- Logging is the act of creating a record of an incident or action. It helps us keep track of the state of an application in application enviornments we can't analyze directly.
+ Logging is the act of creating a record of an incident or action. It helps us keep track of the state of an application in application enviornments we can't analyze directly.In essence, a log file is a repository of records that document events transpiring during the execution of an application
 
 Every node process has three default streams that it can work with, **stdin**, **stdout** and **stderr**.
 
