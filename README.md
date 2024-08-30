@@ -4,7 +4,21 @@ This is a very basic Node REST server with no frameworks, just vanilla node.js.
 
 ## **What is Node?**
 
-Node is an asynchronous event-driven JavaScript runtime
+Node is an asynchronous event-driven JavaScript runtime. It is event-driven, like the browser-based code.
+
+In the browser we write a sequence of instructions that execute one at a time, they don't execute concurrently, in parallel. This doesnt make sense for user interfaces because a user doesnt want the program to freeze after they click a button while the system retrieves a resource. To get around this browsers use events, when you click a button, an event fires and a function runs that had been defined previously but not yet executed.
+
+**Non-blocking I/O**
+
+-Events
+-Asynchronous APIs
+-Non-blocking I/O
+
+
+
+Means your program can make a request for a network resource awhile doing something else and when the operation finishes a callback will run that will handle the result.
+
+A DB is accessed over a network, that network access is non-blocking because 
 
 This is in contrast to today's more common concurrency model, in which OS threads are employed. Thread-based networking is relatively inefficient and very difficult to use. Furthermore, users of Node.js are free from worries of dead-locking the process, since there are no locks. **Almost no function in Node.js directly performs I/O, so the process never blocks except when the I/O is performed using synchronous methods of Node.js** standard library. Because nothing blocks, scalable systems are very reasonable to develop in Node.js.
 
@@ -221,3 +235,7 @@ When using EventEmitter, errors can occur anywhere in the event chain. Normally,
 Errors that occur within asynchronous callbacks are easy to miss. Therefore, as a general principle the first argument to the asynchronous calls should be an Error object. Also, Express routes handle errors themselves, but it should be always remembered that errors occurring in asynchronous calls made within express routes are **not** handled, unless an Error object is sent as a first argument.
 
 Errors in these callbacks can be propagated as many times as possible. Each callback that the error has been propagated to can ignore, handle or propagate the error.
+
+
+**CallBack** - a callback is a function that is passed as an argument to an asynchrous function, that describes
+what to do after the asynchronous operation has completed. 
