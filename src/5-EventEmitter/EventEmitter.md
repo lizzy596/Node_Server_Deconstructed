@@ -10,6 +10,8 @@ It allows you to define custom events and listeners that get triggered when thos
 It follows the publish-subscribe pattern, where one part of your code can publish (or emit) an event and other parts can listen for that event and respond.
 
 
+CHANNEL: {"_events":{},"_eventsCount":1,"clients":{},"subscriptions":{}}
+
 
 An event is emitted by calling the .emit() method, which triggers the event with a specified name:
 myEmitter.emit('eventName');
