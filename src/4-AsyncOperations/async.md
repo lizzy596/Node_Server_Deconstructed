@@ -1,0 +1,3 @@
+Asynchronous programming in Node.js refers to the ability to execute tasks or operations without waiting for them to complete before moving on to the next task.
+
+Non-blocking refers to the ability to initiate an operation and immediately continue with other operations without waiting for the first one to finish. In Node.js, non-blocking I/O means that operations like reading a file or fetching data from the database don't block the execution of other code.

@@ -1,12 +1,12 @@
 The EventEmitter class is a foundational tool for creating and managing asynchronous event-driven patterns in Node.js applications.
 
 
-
-
 The EventEmitter is a core part of Node.js, used to handle asynchronous events. 
 
+Callbacks are one-off asynchronous logic and event emitters are used to dispatch asynchronous logic repeatedly
 
-It allows you to define custom events and listeners that get triggered when those events are emitted. 
+
+The event emitter allows you to define custom events and listeners that get triggered when those events are emitted. 
 It follows the publish-subscribe pattern, where one part of your code can publish (or emit) an event and other parts can listen for that event and respond.
 
 
