@@ -97,3 +97,15 @@ Add a taskFailed event and simulate occasional task failures.
 Implement a retry mechanism for failed tasks.
 Allow multiple listeners for taskCompleted to log metrics or notify other systems.
 
+**Exercise 2: Simple Chat Application**
+
+In this exercise, you will create a basic chat room simulation using the EventEmitter class. The goal is to simulate users joining the chat room, sending messages, and leaving the chat room.
+Requirements
+
+    Use the EventEmitter class from the events module.
+    Create custom events to handle:
+        A user joining the chat.
+        A user sending a message.
+        A user leaving the chat.
+    Add listeners for each event that log appropriate messages to the console.
+
